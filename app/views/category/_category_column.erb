@@ -1,0 +1,26 @@
+<div class="col-xs-12 column ui-state-default ui-sortable-handle">
+  <div class="row">
+
+    <div class="col-xs-12 sortable-control ui-state-default ui-sortable-handle"
+         data-column_id="<%= column.id %>">
+      <div class="pull-left"><span><%= column.name %></span>
+        <button class="primary-button show-hide"><i class="fa fa-eye"></i> Items</button>
+        <button class="primary-button"><i class="fa fa-plus clr-green"></i> Add Items</button>
+      </div>
+
+      <div class="pull-right">
+        <button class="secondary-button remove-column">
+          Remove <i class="fa fa-times clr-red"></i></button>
+      </div>
+    </div>
+
+    <div class="col-xs-12 sortable-items hidden">
+      <div class="row ui-sortable">
+
+        <%= render @items[column.id] %>
+
+      </div>
+    </div>
+
+  </div>
+</div>

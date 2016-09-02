@@ -1,0 +1,41 @@
+<div id="login" class="modal modal-static" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog" style="width: 300px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <b>Sign in for bookmarks</b>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      </div>
+      <div class="modal-body text-center">
+        <%= form_for(User.new, url: session_path(:user), html: {id: 'sign_in_user', :'data-type' => 'json'}, remote: true) do |f| %>
+            <div class="form-group text-left">
+              <%= f.label :email, class: '' %><br/>
+              <%= f.email_field :email, autofocus: true, class: 'form-control input-sm' %>
+            </div>
+
+            <div class="form-group text-left mb-20">
+              <%= f.label :password, class: '' %><br/>
+              <%= f.password_field :password, autocomplete: "off", class: 'form-control input-sm' %>
+            </div>
+
+            <div class="modal-errors"></div>
+
+            <div class="row">
+              <div class="col-xs-12">
+                <% if Devise.mappings[:user].rememberable? %>
+                    <div class="pull-left mt-5">
+                      <%= f.check_box :remember_me %>
+                      <%= f.label :remember_me %>
+                    </div>
+                <% end %>
+
+                <div class="pull-right">
+                  <%= f.submit "Sign in", class: 'btn btn-sm btn-primary' %>
+                </div>
+              </div>
+            </div>
+        <% end %>
+      </div>
+
+    </div>
+  </div>
+</div>

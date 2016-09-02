@@ -1,0 +1,35 @@
+<div id="crop-form" class="modal" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <b>Crop image</b>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      </div>
+      <div class="modal-body">
+
+        <img src="${img}" id="crop_target" style="max-width: 1000px;">
+
+        <form id="crop-image-form" enctype="multipart/form-data">
+          <input type="hidden" name="image_id" value="${image_id}">
+          <input type="hidden" name="crop_x" id="crop_x">
+          <input type="hidden" name="crop_y" id="crop_y">
+          <input type="hidden" name="crop_w" id="crop_w">
+          <input type="hidden" name="crop_h" id="crop_h">
+        </form>
+
+        <div class="row">
+          <div class="modal-footer">
+            <div class="pull-left">
+              <button class="secondary-button" data-dismiss="modal">Cancel</button>
+            </div>
+
+            <div class="pull-right">
+              <button class="primary-button" id="crop-image">Crop</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

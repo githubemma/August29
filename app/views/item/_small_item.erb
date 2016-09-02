@@ -1,0 +1,24 @@
+<div class="col-xs-2 ui-state-default ui-sortable-handle">
+  <div class="small-item" data-item_id="${id}" data-link="${link}"
+       data-description="${description}" data-original-img="${img.url}">
+    {{if img.thumb.url}}
+    <img src="${img.thumb.url}" alt="${title}">
+    {{/if}}
+
+    {{if title}}
+    <div class="item-desc">
+      <div class="title">${title}</div>
+    </div>
+    {{/if}}
+
+    {{if pb_text}}
+    <button class="primary-button ${pb_class}">${pb_text}</button>
+    {{/if}}
+    {{if sb_text}}
+    <button class="secondary-button ${sb_class}">${sb_text}</button>
+    {{/if}}
+    {{if tb_text}}
+    <button class="btn btn-sm btn-success ${tb_class}">${tb_text}</button>
+    {{/if}}
+  </div>
+</div>

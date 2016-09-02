@@ -1,0 +1,36 @@
+<div class="col-xs-12 bb-2">
+  <div class="row">
+
+    <% if admin_signed_in? %>
+    <div class="pull-left"><h4> <%= current_admin.email.capitalize %> </h4></div>
+    <div class="pull-right">
+      <a class="btn btn-sm secondary-button" data-method="delete" rel="nofollow"
+         href="/admins/sign_out"><i class="fa fa-sign-out"></i> Logout</a>
+    </div>
+    <% end %>
+
+  </div>
+</div>
+
+<div class="col-xs-12 bb-2 mb-20">
+  <div class="row">
+    <h4><a href="/" class="fs-16">Go to Homepage</a></h4>
+  </div>
+</div>
+
+<div class="col-xs-12">
+  <div class="row">
+    <ul class="list-unstyled admin-navigation">
+      <li><a href="/admin">Homepage</a></li>
+      <li><a href="/admin/page">Individual Pages</a></li>
+      <li><a href="/admin/suggest">Suggested content</a></li>
+      <li><a href="/admin/report">Reported content</a></li>
+      <li><a href="/admin/slider">Slider</a></li>
+      <li><a href="/admin/comment">Comments</a></li>
+      <li><a href="/admin/article">Articles</a></li>
+      <li><a href="/admin/content">Export / Import</a></li>
+      <li><a href="/admin/admin">Admins</a></li>
+      <li><a href="/admin/user">Users</a></li>
+    </ul>
+  </div>
+</div>

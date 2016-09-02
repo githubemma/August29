@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <% page_title = @title ? @title + ' - Bela Info' : 'Bela info - Info in one place' %>
+  <% page_description = '' %>
+
+  <% if @categories %>
+      <% @categories.each do |c| %>
+          <% page_description += c.name.titleize + ', ' %>
+      <% end %>
+  <% elsif @columns %>
+      <% if @description %>
+      <% page_description += @description + '. ' %>
+      <% end %>
+
+      <% @columns.each do |c| %>
+          <% page_description += c.name.titleize + ', ' %>
+      <% end %>
+  <% end %>
+
+  <% page_description = page_description[0..-3] %>
+
+  <title><%= page_title %></title>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="google-site-verification" content="_L4uIgrSBYVA_HqFgQA6RLheXBDrNopJFTfyvfxjUNk">
+  <meta name="description" content="<%= page_description %>">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Bela Info">
+  <meta property="og:title" content="<%= page_title %>">
+  <meta property="og:description" content="<%= page_description %>">
+  <meta property="og:url" content="<%= "#{request.protocol}#{request.host_with_port}#{request.fullpath}" %>">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="<%= "#{request.protocol}#{request.host_with_port}#{request.fullpath}" %>">
+  <meta name="twitter:title" content="<%= page_title %>">
+  <meta name="twitter:description" content="<%= page_description %>">
+
+  <% if @image %>
+  <meta property="og:image" content="<%= @image.share_banner.url %>">
+  <meta property="og:image:height" content="315">
+  <meta property="og:image:width" content="600">
+  <meta name="twitter:image" content="<%= @image.share_banner.url %>">
+  <% end %>
+
+  <% if @similar_pages %>
+      <% @similar_pages.take(1).each do |p| %>
+          <% similar = p.slug ? p.slug : p.id %>
+          <meta property="og:see_also" content="<%= "#{request.protocol}#{request.host_with_port}/#{similar}" %>">
+      <% end %>
+  <% end %>
+
+  <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track' => true %>
+  <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
+  <%= content_for :header %>
+  <%= favicon_link_tag 'favicon_last.png' %>
+  <%= csrf_meta_tags %>
+
+  <!-- Google Analytics -->
+  <script>
+    (function (i, s, o, g, r, a, m) {
+      i['GoogleAnalyticsObject'] = r;
+      i[r] = i[r] || function () {
+            (i[r].q = i[r].q || []).push(arguments)
+          }, i[r].l = 1 * new Date();
+      a = s.createElement(o),
+          m = s.getElementsByTagName(o)[0];
+      a.async = 1;
+      a.src = g;
+      m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-70190346-4', 'auto');
+    ga('send', 'pageview');
+  </script>
+
+</head>
+<body>
+<div id="wrapper" itemtype="http://schema.org/WebSite" itemscope="">
+  <meta itemprop="url" content="<%= "#{request.protocol}#{request.host_with_port}#{request.fullpath}" %>">
+
+  <!-- content -->
+  <%= yield %>
+
+  <!-- Modal window registration -->
+  <%= render 'individual_page/sign_up' %>
+
+  <!-- Modal window login -->
+  <%= render 'individual_page/sign_in' %>
+
+  <!-- Modal window "Bookmarks" -->
+  <%= render 'individual_page/bookmarks_form' %>
+
+  <!-- Modal window "Email form" -->
+  <%= render 'individual_page/email_form' %>
+
+  <div class="clearfix"></div>
+  <div class="push"></div>
+</div>
+
+<script>
+  // Add active class for the current section
+  var current = window.location.pathname;
+  if (current) {
+    $('.admin-navigation').find('[href="' + current + '"]').parent().addClass('current');
+  }
+</script>
+
+<script>
+  $(document).ready(function () {
+    $("form#sign_in_user, form#sign_up_user").bind("ajax:success", function (event, xhr, settings) {
+      $(this).parents('.modal').modal('hide');
+
+      location.reload();
+    }).bind("ajax:error", function (event, xhr, settings, exceptions) {
+      var error_messages = '';
+
+      if (xhr.responseJSON['error']) {
+        error_messages = "<div class='alert alert-danger'>" + xhr.responseJSON['error'] + "</div>";
+      } else if (xhr.responseJSON['errors']) {
+        $.map(xhr.responseJSON["errors"], function (v, k) {
+          error_messages += "<div class='alert alert-danger'>" + k + " " + v + "</div>";
+        });
+      } else {
+        error_messages = "<div class='alert alert-danger pull-left'>Unknown error</div>";
+      }
+
+      $(this).parents('.modal').find('.modal-errors').html(error_messages);
+    });
+
+    $('.sign-in-form').click(function () {
+      $(this).parents('.modal').modal('hide');
+    });
+  });
+</script>
+
+<script>
+  $(document).ready(function () {
+    // Sort by newest
+    $('.sort-bookmark-new').click(function () {
+      sortBookmarks(compareIds);
+    });
+
+    // Sort by A - Z
+    $('.sort-bookmark-name').click(function () {
+      sortBookmarks(compareNames);
+    });
+
+    // Filter by category
+    $('.filter-bookmark').click(function () {
+      var bookmarks = $('#bookmark').find('.category-box');
+      var category = $(this);
+      var active = category.hasClass('active');
+
+      $('.filter-bookmark').removeClass('active');
+
+      if (active) { // Show all items
+        bookmarks.removeClass('hidden');
+      } else { // Hide unmatched items
+        var items = category.attr('data-filter').split(' ');
+
+        $.each(bookmarks, function (k, v) {
+          var bookmark = $(v);
+
+          if ($.inArray(bookmark.attr('data-page'), items) == -1) {
+            bookmark.addClass('hidden');
+          } else {
+            bookmark.removeClass('hidden');
+          }
+        });
+
+        category.addClass('active');
+      }
+    });
+
+    // Remove bookmark
+    $('body').delegate('.remove-bookmark', 'click', function () {
+      var bookmark = $(this).closest('.category-box');
+      var message = 'Are you sure ?';
+
+      if (bookmark.length && confirm(message)) {
+        $.post("/page/remove_bookmark", {'page_id': bookmark.attr('data-page')}, function (response) {
+        });
+
+        bookmark.remove();
+      }
+
+    });
+
+    // ----------------------
+
+    function compareIds(a, b) {
+      return (+$(a).attr('data-page') > +$(b).attr('data-page')) ? 1 : -1;
+    }
+
+    function compareNames(a, b) {
+      function chunkify(t) {
+        var tz = [], x = 0, y = -1, n = 0, i, j;
+
+        while (i = (j = t.charAt(x++)).charCodeAt(0)) {
+          var m = (i == 46 || (i >= 48 && i <= 57));
+          if (m !== n) {
+            tz[++y] = "";
+            n = m;
+          }
+          tz[y] += j;
+        }
+        return tz;
+      }
+
+      var aa = chunkify($(a).find('.name').text());
+      var bb = chunkify($(b).find('.name').text());
+
+      for (x = 0; aa[x] && bb[x]; x++) {
+        if (aa[x] !== bb[x]) {
+          var c = Number(aa[x]), d = Number(bb[x]);
+          if (c == aa[x] && d == bb[x]) {
+            return c - d;
+          } else return (aa[x] > bb[x]) ? 1 : -1;
+        }
+      }
+      return aa.length - bb.length;
+    }
+
+    function sortBookmarks(compareFunction) {
+      var bookmarks = $('#bookmark').find('.category-box');
+      var categoryList = $('.category-list');
+
+      [].map.call(bookmarks, Object).sort(compareFunction).forEach(function (elem) {
+        categoryList.append(elem);
+      });
+    }
+  });
+</script>
+
+<script>
+  $(document).ready(function () {
+    var bookmarkForm = $('#bookmark');
+    var emailForm = $('#email-form');
+
+    $('body').delegate('.email-bookmark', 'click', function() {
+      var page_id = $(this).closest('.bookmark').attr('data-page');
+      emailForm.find('input[name="email_page_id"]').val(page_id);
+
+      $('#share-by-email').addClass('hidden');
+      $('#share-bookmark-by-email').removeClass('hidden');
+
+      bookmarkForm.modal('hide');
+      emailForm.modal('show');
+    });
+
+    // Share page by email
+    $('#share-bookmark-by-email').click(function () {
+      var button = $(this);
+      var modal = button.parents('.modal');
+      var email = modal.find('input[name="email_share"]');
+      var emailVal = email.val();
+
+      if (/\S+@\S+\.\S+/.test(emailVal)) {
+        button.attr('disable', true);
+
+        $.post("/page/share_by_email", {
+          page_id: modal.find('input[name="email_page_id"]').val(),
+          description: '',
+          email: emailVal
+        }, function (response) {
+          if (response.error != undefined) {
+            email.val('');
+            modal.find('.response-message').text(response.success);
+          } else if (response.success != undefined) {
+            modal.find('.has-error').removeClass('has-error');
+            modal.find('.response-message').text(response.success);
+          }
+
+          button.attr('disable', false);
+        });
+      } else {
+        email.addClass('has-error');
+      }
+    });
+
+  });
+</script>
+
+<footer>
+  <div class="col-xs-12 text-center">
+    <div class="mobile-footer">
+      <ul class="list-inline articles">
+        <% if @articles %>
+            <% @articles.each do |a| %>
+                <li><span class="article-trigger" data-article_id="<%= a.id %>"><%= a.header %></span></li>
+            <% end %>
+        <% end %>
+        <li>© Bela Info <%= Time.now.strftime('%Y') %></li>
+      </ul>
+    </div>
+
+    <div class="desktop-footer">
+      <ul class="list-inline articles">
+        <% if @articles %>
+            <% i = 1 %>
+            <% @articles.each do |a| %>
+                <% if i == 2 %>
+                    <li>© Bela Info <%= Time.now.strftime('%Y') %></li>
+                <% end %>
+                <li><span class="article-trigger" data-article_id="<%= a.id %>"><%= a.header %></span></li>
+                <% i = i + 1 %>
+            <% end %>
+        <% end %>
+
+      </ul>
+
+      <ul class="list-inline user-section">
+        <% if current_user %>
+            <li>Hello, <b><%= current_user.email %></b></li>
+            <li><a href="#" data-toggle="modal" data-target="#bookmark" class="bookmarks">Bookmarks</a></li>
+            <li><%= link_to "Sign out", destroy_user_session_path, :method => :delete %></li>
+        <% else %>
+            <li><%= link_to "Sign in", "#login", "data-toggle" => "modal" %></li>
+            <li><%= link_to "Sign up", "#registration", "data-toggle" => "modal" %></li>
+        <% end %>
+      </ul>
+    </div>
+
+  </div>
+</footer>
+</body>
+</html>

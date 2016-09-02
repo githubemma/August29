@@ -1,0 +1,73 @@
+<div id="bookmark" class="modal modal-static" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <b>Bookmarks</b>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      </div>
+      <div class="modal-body">
+
+        <div class="row">
+          <div class="col-xs-12">
+            <div class="category-list bookmarks-list">
+              <% current_page = false %>
+              <% if @bookmark_pages %>
+                  <% if @bookmark_pages.length > 0 %>
+                      <% @bookmark_pages.each do |p| %>
+                          <% if p.id == @page_id %>
+                          <% current_page = true %>
+                          <% end %>
+
+                          <%= render partial: 'individual_page/bookmark', :locals => {page: p} %>
+                      <% end %>
+                  <% else %>
+                      <h4>No bookmarks yet</h4>
+                  <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer mb-15">
+        <div class="pull-left">
+
+          <div class="dropdown dropup fs-12">
+            <div class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown">Filter</div>
+            <ul class="dropdown-menu">
+              <li class="sort-bookmark-new"><a href="#">Newest</a></li>
+              <li class="sort-bookmark-name"><a href="#">A - Z</a></li>
+              <li class="divider"></li>
+
+              <% if @bookmark_categories %>
+                  <% @bookmark_categories.each do |c| %>
+                      <%
+                        category_pages = ''
+                        @bookmark_category_pages.each do |pages|
+                          if pages.category_id == c.id
+                            category_pages += ' ' + pages.page_id.to_s
+                          end
+                        end
+                      %>
+
+                      <li class="filter-bookmark" data-filter="<%= category_pages.strip %>"><a href="#"><%= c.name %></a></li>
+                  <% end %>
+              <% end %>
+
+            </ul>
+          </div>
+        </div>
+
+        <div class="pull-right">
+          <% if @title && !current_page %>
+          <button class="primary-button" id="add-bookmark">Add "<%= @title %>" to bookmarks</button>
+          <% end %>
+
+          <button class="secondary-button ml-10" data-dismiss="modal">Done</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,55 @@
+<div id="show-copy-item-form" class="modal" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        {{if item_title}}
+        <b>Copy "${item_title}" item</b>
+        {{else}}
+        <b>Copy item</b>
+        {{/if}}
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      </div>
+      <div class="modal-body">
+
+        <form id="copy-item-form" class="mb-20">
+          <input name="item_id" type="hidden" value="${item_id}">
+
+          <table class="table table-hover">
+            <thead>
+            <tr>
+              <th></th>
+              <th>Copy to page</th>
+              <th class="text-right"><button class="primary-button copy-item">Copy</button></th>
+            </tr>
+            </thead>
+
+            <tbody>
+            {{each pages}}
+            <tr>
+              <td><div class="checkbox"><input name="item_pages[${id}]" type="checkbox" value="${id}"></div></td>
+              <td>${title}</td>
+              <td></td>
+            </tr>
+            {{/each}}
+            </tbody>
+
+          </table>
+
+        </form>
+
+        <div class="row">
+          <div class="modal-footer">
+            <div class="pull-left">
+              <button class="secondary-button" data-dismiss="modal">Cancel</button>
+            </div>
+
+            <div class="pull-right">
+              <button class="primary-button copy-item">Copy</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

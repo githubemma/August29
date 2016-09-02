@@ -1,0 +1,333 @@
+<% content_for :header do %>
+    <%= javascript_include_tag 'admin' %>
+<% end %>
+
+<div class="container admin small-padding">
+
+  <div class="row admin-wrapper">
+    <!-- left column -->
+    <div class="left-column">
+      <%= render :partial => 'admin/menu' %>
+    </div>
+
+    <!-- content -->
+    <div class="admin-content">
+      <div class="row">
+
+        <div class="col-xs-12 bb-2 mb-10">
+          <div class="row">
+            <div class="pull-left">
+              <h4>Manage content</h4>
+            </div>
+
+            <div class="pull-right">
+             <div class="row">
+               <div class="col-xs-8">
+                 <%= form_tag '/admin/content/import_content', multipart: true do %>
+                     <div class="row">
+                       <div class="col-xs-9"><%= file_field_tag :file %></div>
+                       <div class="col-xs-3 text-right">
+                         <%= submit_tag 'Import', class: 'btn btn-sm btn-success', id: 'import-content' %>
+                       </div>
+                     </div>
+                 <% end %>
+               </div>
+
+               <div class="col-xs-2 text-right">
+                 <%= form_tag('/admin/content/export_content.csv', method: 'post') do %>
+                     <input type="hidden" name="items">
+                     <%= submit_tag('Export', class: 'primary-button', id: 'export-content') %>
+                 <% end %>
+               </div>
+
+               <div class="col-xs-2 text-right">
+                 <button class="btn btn-sm btn-danger" id="delete-content">Delete</button>
+               </div>
+             </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="manage-content">
+
+          <div>
+            <a href="#" class="show-hide">Show rules</a>
+          </div>
+
+          <div class="row hidden">
+          <div class="col-xs-12">
+           <ul>
+             <li>Please use <b>.CSV</b>(Comma-Separated Values) files.</li>
+             <li><b>Page name</b> must be <b>exactly</b> the same as in the
+               database (e.g "<span class="clr-green">EuroVelo 1</span>" <span class="clr-red">NOT eurovelo 1, Eurovelo 1, etc</span>),
+               otherwise the item will <b>not</b> be added/updated.
+             </li>
+             <li><b>Column name</b> must be <b>exactly</b> the same as in the database, otherwise the item will not be added to column.
+               You can leave the name of the column blank to remove the connection between the item and the column.</li>
+             <li>If the column can not be found on the page - it will be automatically added.</li>
+             <li>If <b>ID</b> is present - the system will update existing item, otherwise - will create a new.</li>
+             <li><b class="clr-red">You can not upload/download images.</b></li>
+           </ul>
+          </div>
+          </div>
+
+          <div class="mt-10 mb-10">
+            <div class="checkbox mb-5"><label class="p-0"><input type="checkbox" class="show-page-group" value="1" checked>Show group by page</label></div>
+            <div class="checkbox"><label class="p-0"><input type="checkbox" class="show-column-group" value="1">Show group by column</label></div>
+          </div>
+
+          <table class="table small-table table-bordered mt-10">
+            <thead>
+            <tr>
+              <th>
+                <div class="checkbox"><input type="checkbox" class="check-all" value="1"></div>
+              </th>
+              <th>ID</th>
+              <th>Page</th>
+              <th>Column</th>
+              <th>Title</th>
+              <th>Description</th>
+              <th>Image</th>
+              <th>Link</th>
+            </tr>
+            </thead>
+
+            <% prev_id = false %>
+            <% prev_col_id = false %>
+            <% @items.each do |i| %>
+
+                <% if i.pid != prev_id %>
+                <tr class="page-check">
+                  <td><div class="checkbox"><input type="checkbox" class="check-page-items" value="<%= i.pid %>"></div></td>
+                  <td class="br-0"></td>
+                  <td class="bl-0" colspan="6"><a href="#" class="check-page-items-link" data-value="<%= i.pid %>"><b><i><%= i.page_title %></i></b></a></td>
+                </tr>
+                <% end %>
+
+                <% if i.cid != prev_col_id %>
+                    <tr class="column-check hidden">
+                      <td>
+                        <div class="checkbox">
+                          <input type="checkbox" class="check-column-items" value="<%= i.cid %>" data-page="<%= i.pid %>">
+                        </div>
+                      </td>
+                      <td class="br-0"></td>
+                      <td class="br-0 bl-0"></td>
+                      <td class="bl-0" colspan="5">
+                        <% if i.cid && i.cid > 0 %>
+                        <a href="#" class="check-column-items-link" data-value="<%= i.cid %>" data-page="<%= i.pid %>"><b><i><%= i.column_name %></i></b></a>
+                        <% else %>
+                        <a href="#" class="check-column-items-link" data-value="<%= i.cid %>" data-page="<%= i.pid %>"><b><i>Not assigned to column</i></b></a>
+                        <% end %>
+                      </td>
+                    </tr>
+                <% end %>
+
+                <tr data-item_id="<%= i.id %>">
+                  <td>
+                    <div class="checkbox"><input type="checkbox" class="export-item page-item-<%= i.pid %> column-item-<%= i.cid %>" value="<%= i.id %>"></div>
+                  </td>
+                  <td><%= i.id %></td>
+                  <td><%= i.page_title %></td>
+                  <td><%= i.column_name %></td>
+                  <td><span title="<%= i.title %>"><%= i.title %></span></td>
+
+                  <% if i.description != nil && i.description.length > 0 %>
+                  <td><span title="<%= i.description %>">[hover to see]</span></td>
+                  <% else %>
+                  <td></td>
+                  <% end %>
+
+                  <% if i.img.url %>
+                  <td><a href="<%= i.img.url %>" target="_blank" title="<%= i.img.url %>">link</a></td>
+                  <% else %>
+                  <td></td>
+                  <% end %>
+
+                  <% if i.link != nil && i.link.length > 0 %>
+                  <td><span title="<%= i.link %>">[hover to see]</span></td>
+                  <% else %>
+                  <td></td>
+                  <% end %>
+                </tr>
+
+                <% prev_col_id = i.cid %>
+                <% prev_id = i.pid %>
+            <% end %>
+          </table>
+        </div>
+
+      </div>
+    </div><!-- /admin-content -->
+
+  </div><!-- /admin-wrapper -->
+</div><!-- /admin -->
+
+<script>
+  $(function () {
+
+    $('.show-page-group').change(function() {
+      $('.page-check').toggleClass('hidden');
+    });
+
+    $('.show-column-group').change(function() {
+      $('.column-check').toggleClass('hidden');
+    });
+
+    // ------------------------
+
+    // Check-uncheck all checkboxes
+    $('.check-all').change(function() {
+      if ($(this).is(':checked')) {
+        $('.export-item').prop('checked', true);
+        $('.check-page-items').prop('checked', true);
+        $('.check-column-items').prop('checked', true);
+      } else {
+        $('.export-item').prop('checked', false);
+        $('.check-page-items').prop('checked', false);
+        $('.check-column-items').prop('checked', false);
+      }
+    });
+
+    // Check-uncheck all column checkboxes
+    $('.check-column-items').change(function() {
+      var column = $(this);
+      var column_id = column.val();
+      var page_id = column.attr('data-page');
+
+      if (column.is(':checked')) {
+        $('.column-item-' + column_id + '.page-item-' + page_id).prop('checked', true);
+      } else {
+        $('.column-item-' + column_id + '.page-item-' + page_id).prop('checked', false);
+      }
+    });
+
+    $('.check-column-items-link').click(function(e) {
+      e.preventDefault();
+
+      var column = $(this);
+      var column_id = column.attr('data-value');
+      var page_id = column.attr('data-page');
+      var checkbox = column.closest('tr').find('input');
+
+      if (checkbox.is(':checked')) {
+        $('.column-item-' + column_id + '.page-item-' + page_id).prop('checked', false);
+        checkbox.prop('checked', false);
+      } else {
+        $('.column-item-' + column_id + '.page-item-' + page_id).prop('checked', true);
+        checkbox.prop('checked', true);
+      }
+    });
+
+    // Check-uncheck all page checkboxes
+    $('.check-page-items').change(function() {
+      var page = $(this);
+      var page_id = page.val();
+
+      if (page.is(':checked')) {
+        $('.page-item-' + page_id).prop('checked', true);
+
+        $('.check-column-items[data-page="' + page_id + '"]').prop('checked', true);
+      } else {
+        $('.page-item-' + page_id).prop('checked', false);
+
+        $('.check-column-items[data-page="' + page_id + '"]').prop('checked', false);
+      }
+    });
+
+    $('.check-page-items-link').click(function(e) {
+      e.preventDefault();
+
+      var page = $(this);
+      var page_id = page.attr('data-value');
+      var checkbox = page.closest('tr').find('input');
+
+      if (checkbox.is(':checked')) {
+        $('.page-item-' + page_id).prop('checked', false);
+
+        $('.check-column-items[data-page="' + page_id + '"]').prop('checked', false);
+
+        checkbox.prop('checked', false);
+      } else {
+        $('.page-item-' + page_id).prop('checked', true);
+
+        $('.check-column-items[data-page="' + page_id + '"]').prop('checked', true);
+
+        checkbox.prop('checked', true);
+      }
+    });
+
+    // Export content
+    $('#export-content').click(function() {
+      var checkboxes = $('.export-item:checked');
+
+      if (checkboxes.length) {
+        if (confirm('Are you sure you want to export selected items ?')) {
+          var items = [];
+
+          $.each(checkboxes, function(k, v) {
+            items.push($(v).val());
+          });
+
+          items = items.join();
+
+          $('input[name="items"]').val(items);
+        } else {
+          return false;
+        }
+      } else {
+        alert('No selected items!');
+        return false;
+      }
+    });
+
+    // Import items
+    $('#import-content').click(function() {
+      if ($('#file').val()) {
+        if (!confirm('Are you sure that you want to import selected file ?')) {
+          return false;
+        }
+      } else {
+        alert('File is not selected!');
+        return false;
+      }
+    });
+
+    // Delete items
+    $('#delete-content').click(function() {
+      var checkboxes = $('.export-item:checked');
+
+      if (checkboxes.length) {
+        var items = [];
+
+        $.each(checkboxes, function(k, v) {
+          items.push($(v).val());
+        });
+
+        if (confirm('Are you sure you want to DELETE (' + items.length + ') selected items ?')) {
+          $.post('/admin/content/delete_content', {items: items}).done(function(response) {
+            console.log(response);
+
+            if (response.success != undefined) {
+              $.each(checkboxes, function(k, v) {
+                $(v).closest('tr').remove();
+              });
+            }
+          });
+        } else {
+          return false;
+        }
+      } else {
+        alert('No selected items!');
+        return false;
+      }
+    });
+
+    $('.show-hide').click(function(e) {
+      e.preventDefault();
+
+      $(this).parent().next('div').toggleClass('hidden');
+    });
+
+  });
+</script>

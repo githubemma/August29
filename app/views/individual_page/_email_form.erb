@@ -1,0 +1,32 @@
+<div id="email-form" class="modal modal-static" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <b>Send page via email</b>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" name="email_page_id" class="form-control" id="email-page-id">
+
+        <div class="form-group">
+          <label for="name">Email</label>
+          <input type="text" name="email_share" class="form-control" id="email-share">
+        </div>
+
+        <div class="response-message"></div>
+      </div>
+
+      <div class="modal-footer mb-15">
+        <div class="pull-left">
+          <button class="secondary-button" data-dismiss="modal">Cancel</button>
+        </div>
+
+        <div class="pull-right">
+          <button class="btn btn-sm btn-primary" id="share-by-email">Send</button>
+          <button class="btn btn-sm btn-primary hidden" id="share-bookmark-by-email">Send</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

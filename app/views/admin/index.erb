@@ -1,0 +1,166 @@
+<% content_for :header do %>
+    <%= javascript_include_tag 'admin' %>
+<% end %>
+
+<div class="container admin small-padding">
+
+  <div class="row admin-wrapper">
+    <!-- left column -->
+    <div class="left-column">
+      <%= render :partial => 'admin/menu' %>
+
+      <hr>
+      <div class="button-wide">
+        <button class="primary-button mt-10" id="add-admin">Add Admin</button>
+      </div>
+
+      <ul class="list-unstyled admin-list active-list mt-20">
+        <% @admins.each do |a| %>
+        <li data-admin_id="<%= a.id %>"><span class="admin-email"><%= a.email %></span>
+          <a class="edit-admin" href="#">edit</a>
+        </li>
+        <% end %>
+      </ul>
+
+    </div>
+
+    <!-- content -->
+    <div class="admin-content">
+      <div class="row">
+
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Admin-form template -->
+<script id="admin-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'admin/admin_form' %>
+</script>
+
+<script>
+$(function() {
+
+  var body = $('body');
+
+  // ------- ADMIN ---------
+
+  // Show Add-admin-Form
+  $('#add-admin').click(function () {
+    var params = {
+      formTitle: 'Add new admin',
+      admin_id: '',
+      email: '',
+      encrypted_password: ''
+    };
+
+    $('#admin-form-template').tmpl(params).appendTo('body');
+    $('#add-admin-form').modal('show');
+  });
+
+  // Show Edit-admin-Form
+  body.delegate('.edit-admin', 'click', function (e) {
+    e.preventDefault();
+    var admin = $(this).parent();
+    var email = admin.find('.admin-email').text();
+
+    var params = {
+      formTitle: 'Edit "' + email + '" admin',
+      admin_id: admin.attr('data-admin_id'),
+      email: email
+    };
+
+    $('#admin-form-template').tmpl(params).appendTo('body');
+    $('#add-admin-form').modal('show');
+  });
+
+  // Delete admin
+  body.delegate('#delete-admin', 'click', function () {
+    var message = 'Are you sure you want to delete admin ?';
+
+    if (confirm(message)) {
+      $.ajax({
+        url: '/admin/admin/delete_admin',
+        type: 'POST',
+        dataType: 'json',
+        async: true,
+        data: $('#admin-form').serialize(),
+        success: function (response) {
+          console.log(response);
+          var adminList = $('.admin-list');
+
+          if (response.admin_id != undefined) {
+            var attr = '[data-admin_id="' + response.admin_id + '"]';
+            adminList.find('li' + attr).remove();
+          }
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+
+      $('#add-admin-form').modal('hide');
+      $('.modal').remove();
+    }
+  });
+
+  // Save admin
+  body.delegate('#save-admin', 'click', function () {
+    var form = $('#admin-form');
+    clearFormErrors(form);
+    if (!checkForEmptyField(form.find('[name="email"]'))) return false;
+    if (!checkForEmptyField(form.find('[name="password"]'))) return false;
+
+    $.ajax({
+      url: '/admin/admin/save_admin',
+      type: 'POST',
+      dataType: 'json',
+      async: true,
+      data: form.serialize(),
+      success: function (response) {
+        console.log(response);
+        var admin = response.admin;
+        var adminList = $('.admin-list');
+
+        if (response.new != undefined) {
+          adminList.append(
+          '<li data-admin_id="' + admin.id + '">' +
+          '<span class="admin-email">' + admin.email + '</span>' +
+          '<a class="edit-admin" href="#">edit</a></li>'
+          );
+        } else {
+          var row = adminList.find('li[data-admin_id="' + admin.id + '"]');
+          row.find('.admin-email').text(admin.email);
+        }
+      },
+      error: function (xhr, textStatus, errorThrown) {
+        console.log(xhr, textStatus, errorThrown);
+      }
+    });
+
+    $('#add-admin-form').modal('hide');
+    $('.modal').remove();
+  });
+  // --------------
+
+  function clearFormErrors(form) {
+    form.find('.has-error').removeClass('has-error');
+  }
+
+  function checkForEmptyField(input) {
+    var len = input.val().length;
+    if (len <= 0) {
+      input.addClass('has-error');
+      return false;
+    }
+    return true;
+  }
+
+  body.on('hidden.bs.modal', '.modal', function () {
+    $('.modal').remove();
+  });
+
+});
+</script>

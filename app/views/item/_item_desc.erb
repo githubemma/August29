@@ -1,0 +1,18 @@
+<div id="item-desc" class="modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <b>${title}</b>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      </div>
+      <div class="modal-body">
+        {{if img}}
+        <img src="${img}" alt="${title}" style="max-width: 568px;">
+        <div style="border-top: 1px solid #eee; margin-top: 15px; padding-top: 10px;">${description}</div>
+        {{else}}
+        <div>${description}</div>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+</div>

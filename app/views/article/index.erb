@@ -1,0 +1,163 @@
+<% content_for :header do %>
+    <%= javascript_include_tag 'admin' %>
+<% end %>
+
+<div class="container admin small-padding">
+
+  <div class="row admin-wrapper">
+    <!-- left column -->
+    <div class="left-column">
+      <%= render :partial => 'admin/menu' %>
+
+      <div class="button-wide">
+        <button class="primary-button" id="add-article">Add Article</button>
+      </div>
+
+      <ul class="list-unstyled article-list active-list">
+        <% @articles.each do |a| %>
+            <li data-article_id="<%= a.id %>">
+              <span class="a-name"><%= a.header %></span>
+            </li>
+        <% end %>
+      </ul>
+    </div>
+
+    <!-- content -->
+    <div class="admin-content">
+      <div class="row">
+        <div id="article">
+
+        </div>
+      </div>
+    </div><!-- /admin-content -->
+
+  </div><!-- /admin-wrapper -->
+</div><!-- /admin -->
+
+<!-- Article-form template -->
+<script id="article-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'article/article_form' %>
+</script>
+
+<script>
+  $(function () {
+    var body = $('body');
+
+    var options = {
+      toolbar: {
+        "fa": true,
+        'font-styles': false,
+        'color': false,
+        'emphasis': {
+          'small': true
+        },
+        'blockquote': true,
+        'lists': true,
+        'html': true,
+        'link': false,
+        'image': false,
+        'smallmodals': false
+      }
+    };
+
+    // Show Add article
+    $('#add-article').click(function () {
+      $('#article').empty();
+      $('#article-form-template').tmpl({formTitle: 'Add new article'}).appendTo('#article');
+
+      $('#text').wysihtml5(options);
+    });
+
+    // Save Article
+    body.delegate('#save-article', 'click', function(){
+      var button = $(this);
+      var form = $('#article-form');
+
+      $.ajax({
+        url: '/admin/article/save_article',
+        type: 'POST',
+        dataType: 'json',
+        async: true,
+        data: form.serialize(),
+        beforeSend: function() {
+          button.attr('disabled', true);
+        },
+        complete: function() {
+          button.attr('disabled', false);
+        },
+        success: function (response) {
+          $('#form-title').text('Article saved');
+
+          var article = response.article;
+          var articleList = $('.article-list');
+
+          if (response.new != undefined) {
+            articleList.append('<li data-article_id="' + article.id + '">' + article.header + '</li>');
+          } else {
+            var row = articleList.find('li[data-article_id="' + article.id + '"]');
+            row.text(article.header);
+          }
+
+          console.log(response);
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+    });
+
+    // Show article content
+    body.delegate('.article-list li', 'click', function () {
+      var article_id = $(this).attr('data-article_id');
+
+      $.ajax({
+        url: 'get_article',
+        type: 'GET',
+        dataType: 'json',
+        async: true,
+        data: {article_id: article_id},
+        success: function (result) {
+          console.log(result);
+
+          $('#article').empty();
+
+          if (result) {
+            var params = {
+              formTitle: 'Edit article',
+              article_id: article_id,
+              header: result.header,
+              text: result.text,
+              status: result.status
+            };
+
+            $('#article-form-template').tmpl(params).appendTo('#article');
+            $('#text').wysihtml5(options);
+          }
+
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+    });
+
+    // --------------------
+
+    function clearFormErrors(form) {
+      form.find('.has-error').removeClass('has-error');
+    }
+
+    function checkForEmptyField(input) {
+      var len = input.val().length;
+      if (len <= 0) {
+        input.addClass('has-error');
+        return false;
+      }
+      return true;
+    }
+
+    body.on('hidden.bs.modal', '.modal', function () {
+      $('.modal').remove();
+    });
+  });
+</script>

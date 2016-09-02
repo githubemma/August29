@@ -1,0 +1,16 @@
+<% if @pages[category.id]  %>
+<div class="category-title" id="category-<%= category.id %>"><%= category.name %></a></div>
+
+<div class="cd-projects-wrapper projects-visible">
+  <ul class="cd-slider list-unstyled">
+    <% @pages[category.id].each do |k, page| %>
+    <%= render partial: 'item/slide_item', :locals => {page: page} %>
+    <% end %>
+  </ul>
+
+  <ul class="cd-slider-navigation list-unstyled">
+    <li><span class="prev inactive"></span></li>
+    <li><span class="next"></span></li>
+  </ul>
+</div> <!-- /cd-projects-wrapper -->
+<% end %>

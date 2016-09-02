@@ -1,0 +1,1472 @@
+<% content_for :header do %>
+    <%= javascript_include_tag 'admin' %>
+<% end %>
+
+<div class="container admin small-padding">
+
+  <div class="row admin-wrapper">
+    <!-- left column -->
+    <div class="left-column">
+      <%= render :partial => 'admin/menu' %>
+
+      <div class="button-wide mb-20">
+        <button class="primary-button" id="add-page">Add Page</button>
+      </div>
+
+      <div class="button-wide mb-20">
+        <button class="primary-button" id="add-folder">Add Folder</button>
+      </div>
+
+      <div class="button-wide">
+        <button class="primary-button" id="add-column">Add Column</button>
+      </div>
+
+      <span class="show-list">show columns</span>
+
+      <ul class="list-unstyled column-list active-list hidden">
+        <% @columns.each do |c| %>
+        <li data-column_id="<%= c.id %>"><span class="col-name"><%= c.name %></span>
+          <span class="to-page"><i class="fa fa-caret-right"></i></span>
+          <a class="edit-column" href="#">edit</a>
+        </li>
+        <% end %>
+      </ul>
+
+    </div>
+
+    <!-- content -->
+    <div class="admin-content">
+      <div class="row">
+        <div class="col-xs-12 bb-2">
+          <div class="row">
+            <div id="page-preview"></div>
+
+            <div class="page-info">
+              <div class="col-xs-12">
+                <input type="hidden" id="allow-add-page" value="0">
+                <input type="hidden" id="page_id">
+
+                <div class="row">
+                  <div class="pull-left">
+                    <h4><span class="hidden"><span id="page-name" data-no-turbolink></span>.Total items on this page:
+                    <span id="total-items"></span></span>&nbsp;</h4>
+                  </div>
+
+                  <div class="pull-right">
+                    <button class="btn btn-sm btn-primary hidden" id="add-twitter-feed">
+                      <i class="fa fa-twitter"></i></button>
+                    <button class="btn btn-sm btn-primary hidden" id="add-quick-link">
+                      <i class="fa fa-plus"></i> Add quick link</button>
+                    <button class="primary-button hidden" id="add-item">
+                      <i class="fa fa-plus"></i> Add Item</button>
+                    <button class="btn btn-sm btn-success" id="save-page-content">
+                      <i class="fa fa-floppy-o"></i> Save Page</button>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="pull-left">
+                    <h4><span id="column-name"></span>&nbsp;</h4>
+                  </div>
+                  <div class="pull-right">
+                    <input type="hidden" id="column_id">
+                    <button class="primary-button hidden" id="column-to-page">
+                      <i class="fa fa-arrow-down"></i> Add column to the Page</button>
+                  </div>
+                </div>
+
+              </div><!-- /col-xs-12-->
+            </div><!-- /page-info-->
+          </div><!-- /row-->
+        </div><!-- /col-xs-12-->
+      </div><!-- /row-->
+
+      <div class="row mt-10">
+        <div class="col-xs-3">
+          <div class="page-list active-list">
+            <% @folders.each do |f| %>
+                <div class="row mb-10">
+                  <div class="col-xs-2">
+                    <button class="secondary-button allow-add-page" data-folder_id="<%= f.id %>"><i class="fa fa-plus clr-green"></i></button>
+                  </div>
+                  <div class="col-xs-10">
+                    <div class="folder" data-folder_id="<%= f.id %>">
+                      <span class="f-name"><%= f.name %></span>
+                      <a class="edit-folder" href="#">edit</a>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="folder-pages hidden" data-folder_id="<%= f.id %>">
+                  <% if @folder_pages[f.id].present? %>
+
+                      <% @folder_pages[f.id].each do |k, v| %>
+                          <% slug = v.slug ? v.slug : v.id %>
+                      <div class="row">
+                        <div class="col-xs-2">
+                          <button class="secondary-button remove-folder-page" data-page_id="<%= v.id %>"><i class="fa fa-minus clr-red"></i></button>
+                        </div>
+                        <div class="col-xs-10">
+                          <div class="ind-page" data-page_id="<%= v.id %>" data-description="<%= v.description %>" data-tag="<%= v.tag %>"
+                               data-img="<%= v.img.url %>" data-original-img="<%= v.img.filename %>" data-page_slug="<%= slug %>">
+
+                            <span class="p-name"><%= v.title %></span>
+                            <a class="edit-page" href="#">edit</a>
+                          </div>
+                        </div>
+                      </div>
+                     <% end %>
+
+                  <% end %>
+                </div>
+
+            <% end %>
+
+            <% @pages.each do |k, v| %>
+                <% slug = v.slug ? v.slug : v.id %>
+                <div class="row">
+                  <div class="col-xs-2 hidden">
+                    <button class="secondary-button remove-folder-page" data-page_id="<%= v.id %>"><i class="fa fa-minus clr-red"></i></button>
+                  </div>
+                  <div class="col-xs-12">
+                    <div class="ind-page" data-page_id="<%= v.id %>" data-description="<%= v.description %>" data-tag="<%= v.tag %>"
+                         data-img="<%= v.img.url %>" data-original-img="<%= v.img.filename %>" data-page_slug="<%= slug %>">
+
+                      <span class="p-name"><%= v.title %></span>
+                      <a class="edit-page" href="#">edit</a>
+                    </div>
+                  </div>
+                </div>
+
+            <% end %>
+          </div>
+        </div>
+
+        <div class="col-xs-9">
+
+          <div class="row">
+            <div class="col-xs-12">
+              <div class="row"><button class="category-items-control">show/hide page items</button></div>
+              <div class="row category-items">
+              </div>
+            </div>
+
+            <div class="col-xs-12 category-columns ui-sortable">
+              <!-- Content of the pages -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Page-form template -->
+<script id="page-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'page/page_form' %>
+</script>
+
+<!-- Item-form template -->
+<script id="item-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'item/item_form' %>
+</script>
+
+<!-- Small item template -->
+<script id="small-item-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'item/small_item' %>
+</script>
+
+<!-- Column-form template -->
+<script id="column-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'column/column_form' %>
+</script>
+
+<!-- Column template -->
+<script id="column-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'column/column' %>
+</script>
+
+<!-- quick-link-form template -->
+<script id="quick-link-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'page/quick_link_form' %>
+</script>
+
+<!-- quick-link-row template -->
+<script id="quick-link-row-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'page/quick_link_row' %>
+</script>
+
+<!-- Folder-form template -->
+<script id="folder-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'page/folder_form' %>
+</script>
+
+<!-- Twitter-feed-form template -->
+<script id="twitter-feed-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'page/twitter_feed_form' %>
+</script>
+
+<!-- Twitter-feed-form template -->
+<script id="copy-item-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'page/copy_item_form' %>
+</script>
+
+<script>
+  $(function () {
+    var body = $('body');
+    var options = {
+      toolbar: {
+        "fa": true,
+        'font-styles': false,
+        'color': false,
+        'emphasis': {
+          'small': true
+        },
+        'blockquote': true,
+        'lists': true,
+        'html': true,
+        'link': false,
+        'image': false,
+        'smallmodals': false
+      }
+    };
+
+    $('.show-list').click(function(){
+      $(this).next('ul').toggleClass('hidden');
+    });
+
+    // Init drag and drop lists
+    $(".category-columns").sortable({
+      revert: true
+    });
+
+    function initDragDropItems() {
+      $(".sortable-items").find('.row').sortable({
+        revert: true
+      });
+    }
+    initDragDropItems();
+
+    // Show/Hide page items
+    $('.category-items-control').click(function(){
+      $('.category-items').toggleClass('hidden');
+    });
+
+    // Show/Hide content
+    body.delegate('.show-hide', 'click', function(){
+      $(this).parent().parent().next().toggleClass('hidden');
+    });
+
+    // Remove column
+    body.delegate('.remove-column', 'click', function(){
+      $(this).closest('.column').remove();
+    });
+
+    // Allow to add items to column
+    body.delegate('.allow-add', 'click', function(){
+      var control = $(this).closest('.sortable-control');
+      var isActive = control.hasClass('active');
+
+      $('.category-columns').find('.active').removeClass('active');
+
+      if (isActive) {
+        control.removeClass('active');
+        control.next().addClass('hidden');
+      } else {
+        control.addClass('active');
+        control.next().removeClass('hidden');
+      }
+
+    });
+
+    // ------- COLUMN ---------
+
+    // Add column to the page
+    $('#column-to-page').click(function(){
+      addColumnToPage( +$('#column_id').val(), $('#column-name').text() );
+    });
+
+    body.delegate('.to-page', 'click', function(){
+      var li = $(this).parent();
+      addColumnToPage( +li.attr('data-column_id'), li.find('.col-name').text() );
+    });
+
+    function addColumnToPage(column_id, name) {
+      var page_id = +$('#page_id').val();
+      if (!page_id) return false;
+      var columns = $('.category-columns');
+
+      var exist = columns.find('[data-column_id="' + column_id + '"]');
+      if (exist.length) {
+        exist.find('.column-items').removeClass('hidden');
+      } else {
+        var column = {
+          id: column_id,
+          name: name
+        };
+
+        $('#column-template').tmpl(column).appendTo(columns);
+        initDragDropItems();
+      }
+    }
+
+    // Save column
+    body.delegate('#save-column', 'click', function () {
+      var form = $('#column-form');
+      clearFormErrors(form);
+      if (!checkForEmptyField(form.find('[name="name"]'))) return false;
+
+      $.ajax({
+        url: '/admin/page/save_column',
+        type: 'POST',
+        dataType: 'json',
+        async: true,
+        data: form.serialize(),
+        success: function (response) {
+          console.log(response);
+          var column = response.column;
+          var columnList = $('.column-list');
+
+          if (response.new != undefined) {
+            columnList.append(
+            '<li data-column_id="' + column.id + '">' +
+            '<span class="col-name">' + column.name + '</span>' +
+            '<span class="to-page"><i class="fa fa-caret-right"></i></span>' +
+            '<a class="edit-column" href="#">edit</a></li>'
+            );
+          } else {
+            var row = columnList.find('li[data-column_id="' + column.id + '"]');
+            row.find('.col-name').text(column.name);
+          }
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+
+      $('#add-column-form').modal('hide');
+      $('.modal').remove();
+    });
+
+    // Delete column
+    body.delegate('#delete-column', 'click', function () {
+      var message = 'Are you sure you want to delete the column?';
+
+      if (confirm(message)) {
+        $.ajax({
+          url: '/admin/page/delete_column',
+          type: 'POST',
+          dataType: 'json',
+          async: true,
+          data: $('#column-form').serialize(),
+          success: function (response) {
+            console.log(response);
+            var columnList = $('.column-list');
+
+            if (response.column_id != undefined) {
+              var attr = '[data-column_id="' + response.column_id + '"]';
+              columnList.find('li' + attr).remove();
+              $('.category-columns').find('div' + attr).remove();
+            }
+          },
+          error: function (xhr, textStatus, errorThrown) {
+            console.log(xhr, textStatus, errorThrown);
+          }
+        });
+
+        $('#add-column-form').modal('hide');
+        $('.modal').remove();
+      }
+    });
+
+    // Show Edit-column-Form
+    body.delegate('.edit-column', 'click', function (e) {
+      e.preventDefault();
+      var column = $(this).parent();
+      var name = column.find('.col-name').text();
+
+      var params = {
+        formTitle: 'Edit "' + name + '" column',
+        column_id: column.attr('data-column_id'),
+        name: name
+      };
+
+      $('#column-form-template').tmpl(params).appendTo('body');
+      $('#add-column-form').modal('show');
+    });
+
+    // Show Add-column-Form
+    $('#add-column').click(function () {
+      var params = {
+        formTitle: 'Add new column',
+        column_id: '',
+        name: ''
+      };
+      $('#column-form-template').tmpl(params).appendTo('body');
+      $('#add-column-form').modal('show');
+    });
+
+    // Show column details
+    body.delegate('.column-list li', 'click', function(){
+      var row = $(this);
+      var id = row.attr('data-column_id');
+      var name = row.find('.col-name').text();
+
+      $('#column-name').text(name);
+
+      $('#column-to-page').removeClass('hidden');
+      $('#column_id').val(id);
+    });
+    // ------- PAGE ---------
+
+    // Save columns and items
+    $('#save-page-content').click(function(){
+      var page_id = +$('#page_id').val();
+      if (!page_id) return false;
+      var button = $(this);
+
+      $.ajax({
+        url: '/admin/page/save_page_content',
+        type: 'POST',
+        dataType: 'json',
+        async: true,
+        data: getPageParamsString(page_id),
+        beforeSend: function() {
+          button.attr('disabled', true);
+        },
+        complete: function() {
+          button.attr('disabled', false);
+        },
+        success: function (response) {
+          console.log(response);
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+    });
+
+    // Show Add-Page-Form
+    $('#add-page').click(function () {
+      var params = {
+        formTitle: 'Add new Individual Page',
+        page_id: '',
+        name: '',
+        description: '',
+        img: '',
+        tag: ''
+      };
+      $('#page-form-template').tmpl(params).appendTo('body');
+      $('#description').wysihtml5(options);
+
+      $('#add-page-form').modal('show');
+    });
+
+    // Show Edit-Page-Form
+    body.delegate('.edit-page', 'click', function () {
+      var page = $(this).parent();
+
+      var params = {
+        formTitle: 'Edit Individual Page',
+        title: page.find('.p-name').text(),
+        page_id: page.attr('data-page_id'),
+        img: page.attr('data-img'),
+        originalImg: page.attr('data-original-img'),
+        description: page.attr('data-description'),
+        tag: page.attr('data-tag')
+      };
+
+      $('#page-form-template').tmpl(params).appendTo('body');
+      $('#description').wysihtml5(options);
+
+      $('#add-page-form').modal('show');
+    });
+
+    // Save page
+    body.delegate('#save-page', 'click', function () {
+      var form = $('#page-form');
+      clearFormErrors(form);
+      if (!checkForEmptyField(form.find('[name="title"]'))) return false;
+
+      var itemForm = document.querySelector('form');
+      var form_data = new FormData(itemForm);
+
+      // -----------------
+
+      $.ajax({
+        url: '/admin/page/save_page',
+        type: 'POST',
+        cache: false,
+        contentType: false,
+        processData: false,
+        data: form_data,
+        success: function (response) {
+          console.log(response);
+
+          if (response.page != undefined) {
+            var page = response.page;
+            var pageList = $('.page-list');
+
+            var rowName = '<span class="p-name">' + page.title + '</span>';
+            rowName += ' <a class="edit-page" href="#">edit</a></div>';
+            var thumb = (page.img.slide.url) ? page.img.slide.url : '';
+
+            if (response.new != undefined) {
+              pageList.append(
+                  '<div class="ind-page" data-page_id="' + page.id + '"' +
+                  ' data-description="' + page.description + '"' +
+                  ' data-tag="' + page.tag + '"' +
+                  ' data-img="' + thumb + '">' +
+                  rowName
+              );
+            } else {
+              var row = pageList.find('.ind-page[data-page_id="' + page.id + '"]');
+              row.attr('data-description', page.description);
+              row.attr('data-tag', page.tag);
+              row.html(rowName);
+              row.attr('data-img', thumb);
+            }
+          }
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+
+      $('#add-page-form').modal('hide');
+      $('.modal').remove();
+    });
+
+    // Delete page
+    body.delegate('#delete-page', 'click', function () {
+      var message = 'Are you sure you want to delete individual page ?';
+      message += ' This will also remove all items on this page';
+
+      if (confirm(message)) {
+        $.ajax({
+          url: '/admin/page/delete_page',
+          type: 'POST',
+          dataType: 'json',
+          async: true,
+          data: $('#page-form').serialize(),
+          success: function (response) {
+            console.log(response);
+            var pageList = $('.page-list');
+
+            if (response.page_id != undefined) {
+              pageList.find('div[data-page_id="' + response.page_id + '"]').remove();
+
+              // Clear items
+              $('.category-items').empty();
+            }
+          },
+          error: function (xhr, textStatus, errorThrown) {
+            console.log(xhr, textStatus, errorThrown);
+          }
+        });
+
+        $('#add-page-form').modal('hide');
+        $('.modal').remove();
+      }
+    });
+
+    function getPageParamsString(page_id) {
+      var data = 'page_id=' + page_id;
+      var columns = $('.column');
+      var len = columns.length;
+      for (var i = 0; i < len; i++) {
+        var column = $(columns[i]);
+        var column_id = +column.attr('data-column_id');
+
+        if (column_id) {
+          data += '&[columns][' + i + '][column_id]=' + column_id;
+          data += '&[columns][' + i + '][column_order]=' + i;
+
+          var items = column.find('div[data-item_id]');
+          var iLen = items.length;
+
+          for (var j = 0; j < iLen; j++) {
+            var item_id = $(items[j]).attr('data-item_id');
+
+            data += '&[columns][' + i + '][items][' + j + '][column_id]=' + column_id;
+            data += '&[columns][' + i + '][items][' + j + '][item_id]=' + item_id;
+            data += '&[columns][' + i + '][items][' + j + '][item_order]=' + j;
+          }
+        }
+      }
+      return data;
+    }
+
+    function renderPageItems(items, itemTemplate, itemWrapper) {
+      var len = items.length;
+
+      for (var i = 0; i < len; i++) {
+        items[i].pb_text = 'Edit';
+        items[i].pb_class = 'edit-item';
+        items[i].sb_text = 'To Column';
+        items[i].sb_class = 'item-to-column';
+        items[i].tb_text = 'Copy';
+        items[i].tb_class = 'show-copy-item-form';
+      }
+      itemTemplate.tmpl(items).appendTo(itemWrapper);
+      changeTotalItemsNumber(len);
+    }
+
+    function getColumnItems(columnItemsData) {
+      var len = columnItemsData.length;
+      var columnItems = [];
+      for (var i = 0; i < len; i++) {
+        columnItems[columnItemsData[i].column_id] = [];
+      }
+
+      for (i = 0; i < len; i++) {
+        var c = columnItemsData[i];
+        columnItems[c.column_id].push({
+          title: c.title,
+          description: c.description,
+          link: c.link,
+          id: c.id,
+          img: c.img,
+          sb_text: 'Remove',
+          sb_class: 'rm-from-col'
+        });
+      }
+
+      return columnItems;
+    }
+
+    function renderPageColumns(columnItemsData, columnsData, itemTemplate, columnWrapper) {
+      var columnItems = getColumnItems(columnItemsData);
+
+      var columns = [];
+      var len = columnsData.length;
+      for (var i = 0; i < len; i++) {
+        c = columnsData[i];
+        columns[i] = {
+          items: columnItems[c.id],
+          id: c.id,
+          name: c.name
+        };
+      }
+      $('#column-template').tmpl(columns).appendTo(columnWrapper);
+
+      len = columns.length;
+      for (i = 0; i < len; i++) {
+        var append = columnWrapper.find('div[data-column_id="' + columns[i].id + '"]')
+        .find('.column-items').find('.row');
+        if (columns[i].items != undefined) {
+          itemTemplate.tmpl(columns[i].items).appendTo(append);
+        }
+      }
+
+      initDragDropItems();
+    }
+
+    // Get Page content or Add page to folder
+    $('.admin').delegate('.ind-page', 'click', function () {
+      var row = $(this);
+      var id = row.attr('data-page_id');
+
+      if ($('#allow-add-page').val() == 1) {
+        addPageToFolder(row, id);
+      } else {
+        getPageContent(row, id);
+      }
+    });
+
+    function addPageToFolder(row, page_id) {
+      var folder = $('.allow-add-page.active');
+      var page = row.closest('.row');
+      var folder_id = folder.attr('data-folder_id');
+
+      var folderRow = folder.closest('.row');
+      var folderPages = folderRow.next('.folder-pages');
+
+      page.appendTo(folderPages);
+      page.find('.col-xs-2').removeClass('hidden');
+      page.find('.col-xs-12').addClass('col-xs-10').removeClass('col-xs-12');
+
+      folderRow.find('.folder').addClass('active');
+      folderPages.removeClass('hidden');
+
+      $.ajax({
+        url: '/admin/page/add_page_to_folder',
+        type: 'POST',
+        dataType: 'json',
+        async: true,
+        data: {page_id: page_id, folder_id: folder_id},
+        success: function (response) {
+          console.log(response);
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+    }
+
+    function getPageContent(row, id) {
+      var img = row.attr('data-img');
+      var pageName = $('#page-name');
+      var pagePreview = $('#page-preview');
+      pageName.parent().removeClass('hidden');
+      pageName.html('<a href="/' + row.attr('data-page_slug') + '">' + row.find('.p-name').text() + '</a>');
+
+      // Add active status
+      $('.ind-page').removeClass('active');
+      row.addClass('active');
+
+      $('#total-items').text('0');
+
+      $.ajax({
+        type: 'GET',
+        url: '/admin/page/get_page_content',
+        dataType: 'json',
+        data: {id: id},
+        success: function (result) {
+          console.log(result);
+          var itemTemplate = $('#small-item-template');
+          var itemWrapper = $('.category-items');
+          var columnWrapper = $('.category-columns');
+          itemWrapper.empty();
+          columnWrapper.empty();
+
+          if (result.items != undefined) {
+            renderPageItems(result.items, itemTemplate, itemWrapper);
+          }
+
+          if (result.column_items != undefined && result.columns != undefined) {
+            renderPageColumns(
+                result.column_items, result.columns, itemTemplate, columnWrapper
+            );
+          }
+
+          // Show "Add Item" button
+          $('#add-item').removeClass('hidden');
+
+          // Show "Add Quick Link" button
+          $('#add-quick-link').removeClass('hidden');
+
+          // Show "Twitter feed" button
+          $('#add-twitter-feed').removeClass('hidden');
+
+          // Add category_id to input for further usage
+          $('#page_id').val(id);
+
+          // Show page image
+          pagePreview.empty();
+          if (img) {
+            pagePreview.append('<img class="img-thumbnail" src="' + img + '">');
+          }
+
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+    }
+
+    // ------- ITEM ---------
+
+    // Add another input for link to item form
+    body.delegate('#add-item-link', 'click', function(e) {
+      e.preventDefault();
+
+      console.log($(this).prev('.form-group'));
+
+      $(this).prev('.form-group').append(
+          '<div class="row separate-links mb-10">' +
+            '<div class="col-xs-1"><button class="btn btn-sm btn-danger remove-link-row">X</button></div>' +
+            '<div class="col-xs-5">' +
+              '<input type="text" name="separate-link-title" class="form-control input-sm" value="" placeholder="title">' +
+            '</div>' +
+            '<div class="col-xs-6">' +
+              '<input type="text" name="separate-link" class="form-control input-sm" value="" placeholder="link">' +
+            '</div>' +
+          '</div>'
+      );
+    });
+
+    body.delegate('.remove-link-row', 'click', function() {
+      $(this).closest('.separate-links').remove();
+    });
+
+    body.delegate('.edit-item', 'click', function () {
+      var page_id = $('#page_id').val();
+
+      if (!page_id) return false;
+      var item = $(this).parent();
+
+      // ------ Multiple links support ----
+      var links = false;
+      var unparsedLinks = item.attr('data-link');
+
+      console.log('unparsedLinks: ' + unparsedLinks);
+
+      if (unparsedLinks) {
+        try {
+          links = [];
+          var parsedLinks = JSON.parse(unparsedLinks);
+          console.log('parsedLinks: ' + parsedLinks);
+
+          $.each(parsedLinks, function(l, link) {
+            links.push(link);
+          });
+
+        } catch (exception) {
+          links = [{link: unparsedLinks}]
+        }
+      }
+
+      console.log(links);
+      // --------------------------
+
+      var params = {
+        formTitle: 'Edit item',
+        page_id: page_id,
+        item_id: item.attr('data-item_id'),
+        title: item.find('.title').text(),
+        img: item.find('img').attr('src'),
+        originalImg: item.attr('data-original-img'),
+        description: item.attr('data-description'),
+        links: links
+      };
+
+      $('#item-form-template').tmpl(params).appendTo('body');
+      $('#description').wysihtml5(options);
+
+
+      $('#add-item-form').modal('show');
+    });
+
+    // Add item to column
+    body.delegate('.item-to-column', 'click', function(){
+      var item = $(this).closest('.small-item');
+      var item_id = +item.attr('data-item_id');
+      var activeColumn = $('.category-columns').find('.active');
+      var columnItems = activeColumn.next();
+
+      if (!item_id || !activeColumn.length) return false;
+
+      var exist = activeColumn.next().find('div[data-item_id="' + item_id + '"]');
+      if (!exist.length) {
+        var thumb = {thumb: {url: item.find('img').attr('src')}};
+
+        var clone = {
+          id: item_id,
+          title: item.find('.title').text(),
+          img: thumb,
+          link: item.attr('data-link'),
+          description: item.attr('data-description'),
+          sb_text: 'Remove',
+          sb_class: 'rm-from-col'
+        };
+
+        $('#small-item-template').tmpl(clone).appendTo(columnItems.find('.row'));
+      }
+
+      columnItems.removeClass('hidden');
+    });
+
+    // Remove item from column
+    body.delegate('.rm-from-col', 'click', function(){
+      $(this).closest('.small-item').parent().remove();
+    });
+
+    // Show Add-Item-Form
+    $('#add-item').click(function () {
+      var page_id = $('#page_id').val();
+      if (!page_id) return false;
+      var params = {
+        formTitle: 'Add new item',
+        page_id: page_id
+      };
+
+      $('#item-form-template').tmpl(params).appendTo('body');
+      $('#description').wysihtml5(options);
+
+      $('#add-item-form').modal('show');
+    });
+
+    // Save Item
+    body.delegate('#save-item', 'click', function () {
+      var form = $('#item-form');
+      clearFormErrors(form);
+//      if (!checkForEmptyField(form.find('[name="title"]'))) return false;
+
+      var links = [];
+      var separateLinks = form.find('.separate-links');
+      $.each(separateLinks, function(k, separateLinks) {
+
+        var title = $(separateLinks).find('input[name="separate-link-title"]');
+        var link = $(separateLinks).find('input[name="separate-link"]');
+
+        links.push({title: title.val(), link: link.val()});
+      });
+
+      links = JSON.stringify(links);
+
+      console.log(links);
+
+      form.find('input[name="link"]').val(links);
+      var item_id = +form.find('[name="item_id"]').val();
+      var itemForm = document.querySelector('form');
+      var form_data = new FormData(itemForm);
+
+      $.ajax({
+        url: '/admin/page/save_item',
+        type: 'POST',
+        cache: false,
+        contentType: false,
+        processData: false,
+        data: form_data,
+        success: function (result) {
+          console.log(result);
+
+          renderItem(result.item, item_id, result.new);
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+
+      $('#add-item-form').modal('hide');
+      $('.modal').remove();
+    });
+
+    // Delete item
+    body.delegate('#delete-item', 'click', function () {
+      var message = 'Are you sure you want to delete the item?';
+      var item_id = +$('#item-form').find('[name="item_id"]').val();
+
+      if (confirm(message)) {
+        $.ajax({
+          url: '/admin/page/delete_item',
+          type: 'POST',
+          dataType: 'json',
+          async: true,
+          data: {item_id: item_id},
+          success: function (response) {
+            console.log(response);
+            var categoryItems = $('.category-items');
+            var columnItems = $('.column-items');
+
+            // Find and delete item in the category and in all columns
+            if (response.item_id != undefined) {
+              categoryItems.find('div[data-item_id="' + response.item_id + '"]').parent().remove();
+              columnItems.find('div[data-item_id="' + response.item_id + '"]').parent().remove();
+            }
+          },
+          error: function (xhr, textStatus, errorThrown) {
+            console.log(xhr, textStatus, errorThrown);
+          }
+        });
+
+        $('#add-item-form').modal('hide');
+        $('.modal').remove();
+        changeTotalItemsNumber(null, -1);
+      }
+    });
+
+    function renderItem(item, item_id, newItem) {
+      if (item.id) {
+        var wrapper = $('.category-items');
+
+        if (newItem) { // New item
+          item.pb_text = 'Edit';
+          item.pb_class = 'edit-item';
+          item.sb_text = 'To Column';
+          item.sb_class = 'item-to-column';
+          item.tb_text = 'Copy';
+          item.tb_class = 'show-copy-item-form';
+
+          $('#small-item-template').tmpl(item).appendTo(wrapper);
+        } else { // Update
+          var exists = wrapper.find('div[data-item_id="' + item_id + '"]');
+          exists.attr('data-link', item.link);
+          exists.attr('data-description', item.description);
+          exists.find('.title').text(item.title);
+
+          var exImg = exists.find('img');
+          var thumb = item.img.thumb.url;
+          if (exImg.length) {
+            exImg.attr('src', thumb);
+          } else {
+            exists.find('.item-desc').before('<img src="' + thumb + '">');
+          }
+        }
+
+        // Increasing the total number of items in the category
+        changeTotalItemsNumber(null, 1);
+      }
+    }
+
+    function changeTotalItemsNumber(set, change) {
+      var total = $('#total-items');
+      if (set != null) total.text(set);
+      if (change != undefined) {
+        var val = +total.text();
+        total.text(val + change);
+      }
+    }
+
+    function clearFormErrors(form) {
+      form.find('.has-error').removeClass('has-error');
+    }
+
+    function checkForEmptyField(input) {
+      var len = input.val().length;
+      if (len <= 0) {
+        input.addClass('has-error');
+        return false;
+      }
+      return true;
+    }
+
+    // ---------- Copy item --------
+
+    // show copy item forn
+    body.delegate('.show-copy-item-form', 'click', function() {
+      var item = $(this).closest('.small-item');
+      var item_id = +item.attr('data-item_id');
+
+      console.log();
+
+      $.get('/admin/page/get_item_pages', {page_id: $('#page_id').val()}).done(function(response) {
+          console.log(response);
+
+          var params = {
+            pages: response.pages,
+            item_title: item.find('.title').text(),
+            item_id: item_id
+          };
+
+          $('#copy-item-form-template').tmpl(params).appendTo('body');
+          $('#show-copy-item-form').modal('show');
+      });
+    });
+
+    // copy item
+    body.delegate('.copy-item', 'click', function(e) {
+      e.preventDefault();
+
+      var form = $('#copy-item-form');
+      var item_id = form.find('input[name="item_id"]').val();
+
+      if (item_id && item_id > 0) {
+        var checkboxes = form.find('input[type="checkbox"]:checked');
+        var pages = [];
+        $.each(checkboxes, function(k, v) {
+          pages.push($(v).val());
+        });
+
+        $.post('/admin/page/copy_item', {item_id: item_id, pages: pages}).done(function(response) {
+          console.log(response);
+//            alert('Refresh the page to see the changes');
+        });
+
+        $('#show-copy-item-form').modal('hide');
+        $('.modal').remove();
+      }
+
+    });
+
+    // ------ Quick Links ------
+
+    // Show Quick-Links-Form
+    $('#add-quick-link').click(function(){
+      var page_id = $('#page_id').val();
+
+      $.ajax({
+        url: '/admin/page/get_links',
+        type: 'GET',
+        dataType: 'json',
+        async: true,
+        data: {page_id: page_id},
+        success: function (response) {
+          console.log(response);
+
+          var params = {
+            links: response.links,
+            page_id: page_id
+          };
+
+          $('#quick-link-form-template').tmpl(params).appendTo('body');
+          $('#add-quick-link-form').modal('show');
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+    });
+
+    // Add row to table with quick links
+    body.delegate('.add-link', 'click', function(e){
+      e.preventDefault();
+      var appendTo = $('#quick-link-table').find('tbody');
+      var id = 'new_' + appendTo.find('tr').length;
+      $('#quick-link-row-template').tmpl({id: id, page_id: $('#page_id').val()}).appendTo(appendTo);
+    });
+
+    // Delete quick link
+    body.delegate('.remove-link', 'click', function(e){
+      e.preventDefault();
+      var row = $(this).closest('tr');
+      var link_id = row.attr('data-link_id');
+      row.remove();
+
+      $.ajax({
+        url: '/admin/page/delete_quick_link',
+        type: 'POST',
+        dataType: 'json',
+        async: true,
+        data: {link_id: link_id},
+        success: function (result) {
+          console.log(result);
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+    });
+
+    // Save quick links
+    body.delegate('#save-quick-link', 'click', function(){
+      var button = $(this);
+      var form = $('#quick-link-form');
+
+      clearFormErrors(form);
+      var inputs = form.find('.input-name, .input-link');
+      var valid = true;
+      $.each(inputs, function(k, v){
+        if (!checkForEmptyField($(v))) valid = false;
+      });
+
+      if (valid) {
+        $.ajax({
+          url: '/admin/page/save_quick_links',
+          type: 'POST',
+          dataType: 'json',
+          async: true,
+          data: form.serialize(),
+          beforeSend: function() {
+            button.attr('disabled', true);
+          },
+          complete: function() {
+            button.attr('disabled', false);
+          },
+          success: function (result) {
+            console.log(result);
+
+            $('#add-quick-link-form').modal('hide');
+            $('.modal').remove();
+          },
+          error: function (xhr, textStatus, errorThrown) {
+            console.log(xhr, textStatus, errorThrown);
+          }
+        });
+      }
+    });
+
+    // ------ Twitter feed ------
+
+    // Show Twitter-feed-Form
+    $('#add-twitter-feed').click(function(){
+      var page_id = $('#page_id').val();
+
+      $.ajax({
+        url: '/admin/page/get_twitter_feed',
+        type: 'GET',
+        dataType: 'json',
+        async: true,
+        data: {page_id: page_id},
+        success: function (response) {
+          console.log(response);
+
+          var params = {
+            page_id: page_id
+          };
+
+          if (response.twitter_feed != undefined && response.twitter_feed) {
+            params.twitter_feed_id = response.twitter_feed.id;
+            params.hashtag = response.twitter_feed.hashtag;
+            params.title = response.twitter_feed.title;
+            params.widget = response.twitter_feed.widget;
+          }
+
+          $('#twitter-feed-form-template').tmpl(params).appendTo('body');
+          $('#add-twitter-feed-form').modal('show');
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+    });
+
+    // Delete quick link
+    body.delegate('#delete-twitter-feed', 'click', function(e){
+      e.preventDefault();
+
+      var form = $('#add-twitter-feed-form');
+      var twitter_feed_id = form.find('input[name="twitter_feed_id"]').val();
+
+      console.log('twitter_feed_id: ' + twitter_feed_id);
+
+      $.ajax({
+        url: '/admin/page/delete_twitter_feed',
+        type: 'POST',
+        dataType: 'json',
+        async: true,
+        data: {twitter_feed_id: twitter_feed_id},
+        success: function (result) {
+          console.log(result);
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+
+      form.modal('hide');
+      $('.modal').remove();
+    });
+
+    // Save twitter feed
+    body.delegate('#save-twitter-feed', 'click', function(){
+      var button = $(this);
+      var form = $('#twitter-feed-form');
+
+      clearFormErrors(form);
+      var inputs = form.find('.input-title, .input-hashtag, .input-widget');
+      var valid = true;
+      $.each(inputs, function(k, v){
+        if (!checkForEmptyField($(v))) valid = false;
+      });
+
+      if (valid) {
+        $.ajax({
+          url: '/admin/page/save_twitter_feed',
+          type: 'POST',
+          dataType: 'json',
+          async: true,
+          data: form.serialize(),
+          beforeSend: function() {
+            button.attr('disabled', true);
+          },
+          complete: function() {
+            button.attr('disabled', false);
+          },
+          success: function (result) {
+            console.log(result);
+
+            $('#add-twitter-feed-form').modal('hide');
+            $('.modal').remove();
+          },
+          error: function (xhr, textStatus, errorThrown) {
+            console.log(xhr, textStatus, errorThrown);
+          }
+        });
+      }
+    });
+
+    // ----------------
+
+    // Show Add-Folder-Form
+    $('#add-folder').click(function () {
+      var params = {
+        formTitle: 'Add new Folder',
+        folder_id: '',
+        name: ''
+      };
+      $('#folder-form-template').tmpl(params).appendTo('body');
+      $('#add-folder-form').modal('show');
+    });
+
+    // Show Edit-Folder-Form
+    body.delegate('.edit-folder', 'click', function () {
+      var folder = $(this).parent();
+
+      var params = {
+        formTitle: 'Edit Folder',
+        name: folder.find('.f-name').text(),
+        folder_id: folder.attr('data-folder_id')
+      };
+
+      $('#folder-form-template').tmpl(params).appendTo('body');
+      $('#add-folder-form').modal('show');
+    });
+
+    // Save folder
+    body.delegate('#save-folder', 'click', function () {
+      var form = $('#folder-form');
+      clearFormErrors(form);
+      if (!checkForEmptyField(form.find('[name="name"]'))) return false;
+
+      // -----------------
+
+      $.ajax({
+        url: '/admin/page/save_folder',
+        type: 'POST',
+        dataType: 'json',
+        async: true,
+        data: form.serialize(),
+        success: function (response) {
+          console.log(response);
+
+          if (response.folder != undefined) {
+            var folder = response.folder;
+            var pageList = $('.page-list');
+
+            if (response.new != undefined) {
+              var html = '<div class="row mb-10"><div class="col-xs-2">';
+              html += '<button class="secondary-button allow-add-page" data-folder_id="' + folder.id + '">';
+              html += '<i class="fa fa-plus clr-green"></i></button></div>';
+              html += '<div class="col-xs-10">';
+              html += '<div class="folder" data-folder_id="' + folder.id + '">';
+              html += '<span class="f-name">' + folder.name + '</span>';
+              html += '<a class="edit-folder" href="#">edit</a>';
+              html += '</div></div></div>';
+              html += '<div class="folder-pages hidden" data-folder_id="' + folder.id + '"></div>';
+
+              pageList.prepend(html);
+            } else {
+              var row = pageList.find('.folder[data-folder_id="' + folder.id + '"]');
+              row.find('.f-name').text(folder.name);
+            }
+          }
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+
+      $('#add-folder-form').modal('hide');
+      $('.modal').remove();
+    });
+
+    // Delete folder
+    body.delegate('#delete-folder', 'click', function () {
+      var message = 'Are you sure you want to delete folder ?';
+
+      if (confirm(message)) {
+        $.ajax({
+          url: '/admin/page/delete_folder',
+          type: 'POST',
+          dataType: 'json',
+          async: true,
+          data: $('#folder-form').serialize(),
+          success: function (response) {
+            console.log(response);
+            var pageList = $('.page-list');
+
+            if (response.folder_id != undefined) {
+              var folder = pageList.find('.folder[data-folder_id="' + response.folder_id + '"]');
+              var folderRow = folder.closest('.row');
+              var folderPages = folderRow.next('.folder-pages');
+
+              var pages = folderPages.find('.row');
+              $.each(pages, function(k, v) {
+                var pageRow = $(v);
+                pageRow.appendTo(pageList);
+
+                pageRow.find('.col-xs-2').addClass('hidden');
+                pageRow.find('.col-xs-10').addClass('col-xs-12').removeClass('col-xs-10');
+              });
+
+              folderRow.remove();
+              folderPages.remove();
+            }
+          },
+          error: function (xhr, textStatus, errorThrown) {
+            console.log(xhr, textStatus, errorThrown);
+          }
+        });
+
+        $('#add-folder-form').modal('hide');
+        $('.modal').remove();
+      }
+    });
+
+    // Show folder pages
+    body.delegate('.folder', 'click', function() {
+      var folder = $(this);
+      var folderPages = folder.closest('.row').next('.folder-pages');
+
+      if (folder.hasClass('active')) {
+        folder.removeClass('active');
+        folderPages.addClass('hidden');
+      } else {
+        folder.addClass('active');
+        folderPages.removeClass('hidden');
+      }
+    });
+
+    // ----------------
+
+    // Add page to the folder
+    body.delegate('.allow-add-page', 'click', function() {
+      var button =  $(this);
+      var active = button.hasClass('active');
+      var allow = $('#allow-add-page');
+
+      $('.allow-add-page').removeClass('active');
+
+      if (active) {
+        button.removeClass('active');
+        allow.val(0);
+      } else {
+        button.addClass('active');
+        allow.val(1);
+      }
+    });
+
+    // Remove page from the folder
+    body.delegate('.remove-folder-page', 'click', function() {
+      var button = $(this);
+      var pageRow = button.closest('.row');
+      var page_id = button.attr('data-page_id');
+      var folder_id = pageRow.closest('.folder-pages').attr('data-folder_id');
+
+      pageRow.appendTo($('.page-list'));
+
+      pageRow.find('.col-xs-2').addClass('hidden');
+      pageRow.find('.col-xs-10').addClass('col-xs-12').removeClass('col-xs-10');
+
+      console.log(page_id);
+      console.log(folder_id);
+
+      $.ajax({
+        url: '/admin/page/remove_page_from_folder',
+        type: 'POST',
+        dataType: 'json',
+        async: true,
+        data: {page_id: page_id, folder_id: folder_id},
+        success: function (response) {
+          console.log(response);
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+    });
+
+    // ----------------
+
+    body.on('hidden.bs.modal', '.modal', function () {
+      $('.modal').remove();
+    });
+
+    // Makes active row in list
+    body.delegate('.active-list li', 'click', function(){
+      var row = $(this);
+      if (!row.hasClass('current')) {
+        var ul = row.closest('.active-list');
+        ul.find('li').removeClass('current');
+        row.addClass('current');
+      }
+    });
+
+
+  });
+</script>

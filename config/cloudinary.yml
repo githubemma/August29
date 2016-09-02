@@ -1,0 +1,19 @@
+---
+development:
+  cloud_name: belainfo
+  api_key: '947571898414666'
+  api_secret: nZQkEGiQCkFmz9TY3oFiA745cM4
+  enhance_image_tag: true
+  static_image_support: true
+production:
+  cloud_name: belainfo
+  api_key: '947571898414666'
+  api_secret: nZQkEGiQCkFmz9TY3oFiA745cM4
+  enhance_image_tag: true
+  static_image_support: true
+test:
+  cloud_name: belainfo
+  api_key: '947571898414666'
+  api_secret: nZQkEGiQCkFmz9TY3oFiA745cM4
+  enhance_image_tag: true
+  static_image_support: true

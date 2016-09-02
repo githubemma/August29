@@ -1,0 +1,54 @@
+<div id="assign-slider-form" class="modal" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <b>Assign slider</b>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form enctype="multipart/form-data" id="sliders-form" class="mb-20">
+
+          <table class="table">
+            <thead>
+            <tr><th>Page</th><th>Slider</th></tr>
+            </thead>
+
+            <tbody>
+              {{each pages}}
+              <tr>
+                <td><a href="/page/${id}" target="_blank">${title}</a></td>
+                <td>
+                  <select name="page[${id}]" class="form-control input-sm">
+                    {{each sliders}}
+                    {{if sl_id == slider_id}}
+                    <option value="${sl_id}" selected>${name}</option>
+                    {{else}}
+                    <option value="${sl_id}">${name}</option>
+                    {{/if}}
+                    {{/each}}
+                  </select>
+                </td>
+              </tr>
+              {{/each}}
+            </tbody>
+
+          </table>
+
+        </form>
+
+        <div class="row">
+          <div class="modal-footer">
+            <div class="pull-left">
+              <button class="secondary-button" data-dismiss="modal">Cancel</button>
+            </div>
+
+            <div class="pull-right">
+              <button class="primary-button" id="save-assign-slider">Save</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

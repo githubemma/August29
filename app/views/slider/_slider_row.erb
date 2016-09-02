@@ -1,0 +1,39 @@
+<tr data-image_id="${id}">
+  <td>
+    {{if img}}
+    <img src="${img.banner.url}" class="img-thumbnail upload-image" data-original="${img.url}">
+    {{else}}
+    <img src="/assets/logo.png" class="img-thumbnail upload-image">
+    {{/if}}
+
+    {{if disabled}}
+    <!--<button class="primary-button" disabled><i class="fa fa-crop"></i> Crop image</button>-->
+    {{else}}
+    <!--<button class="primary-button crop"><i class="fa fa-crop"></i> Crop image</button>-->
+    {{/if}}
+  </td>
+  <td>
+    <input type="file" class="hidden" name="image[${id}][img]">
+    <div class="row">
+      <div class="form-group">
+        <span><b>Title</b>
+          <input type="text" class="form-control input-sm" name="image[${id}][title]" value="${title}">
+        </span>
+      </div>
+      <div class="form-group">
+        <span><b>Sub header</b>
+          <input type="text" class="form-control input-sm" name="image[${id}][sub_header]" value="${sub_header}">
+        </span>
+      </div>
+      <div class="form-group">
+        <span><b>Source</b>
+          <input type="text" class="form-control input-sm" name="image[${id}][source]" value="${source}">
+        </span>
+      </div>
+    </div>
+  </td>
+  <td class="text-right">
+    <button class="btn btn-sm btn-danger remove-image">
+      <i class="fa fa-minus"></i></button>
+  </td>
+</tr>

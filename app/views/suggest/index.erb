@@ -1,0 +1,401 @@
+<% content_for :header do %>
+    <%= javascript_include_tag 'admin' %>
+<% end %>
+
+<div class="container admin small-padding">
+
+  <div class="row admin-wrapper">
+    <!-- left column -->
+    <div class="left-column">
+      <%= render :partial => 'admin/menu' %>
+    </div>
+
+    <!-- content -->
+    <div class="admin-content">
+      <div class="row">
+
+        <div class="col-xs-12 bb-2">
+          <div class="row">
+            <div class="pull-left">
+              <h4>Suggested content</h4>
+            </div>
+
+            <!--<div class="pull-right">-->
+              <!--<button class="btn btn-sm btn-success" id="accept-all">Accept All</button>-->
+              <!--<button class="btn btn-sm btn-danger" id="decline-all">Decline All</button>-->
+            <!--</div>-->
+          </div>
+        </div>
+
+        <div class="col-xs-12 suggested-content">
+          <div class="row">
+          <% @columns.each do |c|%>
+          <div class="col-xs-12 bb-2 mt-10 sug-cont" data-column="<%= c.id %>" data-page="<%= c.page_id %>">
+            <div class="row">
+              <div class="col-xs-3">
+                <h5><b>New column:</b> <span class="col-name"><%= c.name %></span></h5>
+              </div>
+
+              <div class="col-xs-8 col-xs-offset-1">
+                <div class="row">
+                  <div class="pull-left">
+                    <% slug = c.slug ? c.slug : c.id %>
+                    <h5 data-no-turbolink><b>Page:</b> <a href="/<%= slug %>"><%= c.page_title %></a></h5>
+                  </div>
+
+                  <div class="pull-right">
+                    <button class="btn btn-xs btn-primary edit-column">Edit</button>
+                    <button class="btn btn-xs btn-success accept">Accept</button>
+                    <button class="btn btn-xs btn-danger decline">Decline</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <% end %>
+
+          <hr>
+
+          <% @items.each do |i|%>
+          <div class="col-xs-12 bb-2 mt-10 sug-cont" data-item="<%= i.id %>" data-page="<%= i.page_id %>"
+               data-link="<%= i.link %>" data-description="<%= i.description %>">
+            <div class="row">
+              <div class="col-xs-3">
+                <div class="item">
+                  <% if i.img.thumb.url %>
+                      <div class="img-wrapper">
+                        <img src="<%= i.img.thumb.url %>" data-original="<%= i.img.url %>">
+                      </div>
+                  <% end %>
+                  <div class="item-desc">
+                    <div class="title"><%= i.title %></div>
+                    <div class="desc"><%= i.description %></div>
+                  </div>
+                  <div class="clearfix"></div>
+                </div>
+              </div>
+
+              <div class="col-xs-8 col-xs-offset-1">
+                <div class="row">
+                  <div class="pull-left">
+                    <% slug = i.slug ? i.slug : i.id %>
+                    <h5 data-no-turbolink><b>Page:</b> <a href="/<%= slug %>"><%= i.page_title %></a></h5>
+                    <% if i.column_status == 2 %>
+                        <h5><b>Column:</b> <%= i.column_name %> <b class="clr-green">NEW</b></h5>
+                    <% else %>
+                        <h5><b>Column:</b> <%= i.column_name %></h5>
+                    <% end %>
+                    <p><b>Title:</b> <%= i.title %></p>
+                    <p><b>Description:</b> <%= i.description %></p>
+                    <p data-no-turbolink><b>Link:</b> <a href="<%= i.link %>"><%= i.link %></a></p>
+                  </div>
+
+                  <div class="pull-right">
+                    <button class="btn btn-xs btn-primary edit-item">Edit</button>
+                    <button class="btn btn-xs btn-success accept">Accept</button>
+                    <button class="btn btn-xs btn-danger decline">Decline</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <% end %>
+          </div>
+
+          <div class="show-hide clr-blue fs-16 mt-20">History &nbsp;&nbsp;&nbsp;&nbsp;
+            <button class="btn btn-sm btn-danger clear-history">Clear History</button> </div>
+          <div class="suggest-history hidden">
+            <% @histories.each do |h|%>
+            <p class="clr-grey">[<%= h.created_at.strftime('%d-%m-%Y %H:%M') %>] <%=raw h.history %></p>
+            <% end %>
+          </div>
+
+        </div>
+
+      </div>
+    </div><!-- /admin-content -->
+
+  </div><!-- /admin-wrapper -->
+</div><!-- /admin -->
+
+<!-- Column-form template -->
+<script id="column-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'column/column_form' %>
+</script>
+
+<!-- Item-form template -->
+<script id="item-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'item/item_form' %>
+</script>
+
+<script>
+  $(function() {
+    var msg = 'Are you sure ?';
+
+    // Accept
+    $('.accept').click(function(){
+      proccessOne($(this), '/admin/suggest/accept');
+    });
+
+    // Decline
+    $('.decline').click(function(){
+      proccessOne($(this), '/admin/suggest/decline');
+    });
+
+    // Accept All
+    $('#accept-all').click(function(){
+      proccessAll('/admin/suggest/accept_all');
+    });
+
+    // Decline All
+    $('#decline-all').click(function(){
+      proccessAll('/admin/suggest/decline_all');
+    });
+
+    // --------------------
+
+    function proccessAll(url) {
+      if (confirm(msg)) {
+        $.ajax({
+          url: url,
+          type: 'POST',
+          dataType: 'json',
+          async: true,
+          data: {do_action: true},
+          success: function (response) {
+            console.log(response);
+
+            removeAllContent();
+          },
+          error: function (xhr, textStatus, errorThrown) {
+            console.log(xhr, textStatus, errorThrown);
+          }
+        });
+      }
+    }
+
+    function proccessOne(button, url) {
+      if (confirm(msg)) {
+        var content = button.closest('.sug-cont');
+        var item_id = +content.attr('data-item');
+        var column_id = +content.attr('data-column');
+        var page_id = +content.attr('data-page');
+
+        if (item_id) {
+          var type = 'item';
+        } else {
+          type = 'column';
+        }
+
+        $.ajax({
+          url: url,
+          type: 'POST',
+          dataType: 'json',
+          async: true,
+          data: {type: type, item_id: item_id, column_id: column_id, page_id: page_id},
+          success: function (response) {
+            console.log(response);
+
+            removeContent(type, item_id, column_id);
+            addHistory(response.created_at, response.history);
+          },
+          error: function (xhr, textStatus, errorThrown) {
+            console.log(xhr, textStatus, errorThrown);
+          }
+        });
+      }
+    }
+
+    function removeContent(type, item_id, column_id) {
+      var wrapper = $('.suggested-content');
+      if (type == 'item') {
+        wrapper.find('div[data-item="' + item_id + '"]').remove();
+      } else {
+        wrapper.find('div[data-column="' + column_id + '"]').remove();
+      }
+    }
+
+    function removeAllContent() {
+      $('.suggested-content').empty();
+    }
+
+    function addHistory(created_at, history) {
+      $('.suggest-history').prepend(
+         '<p class="clr-grey ">[' + created_at + '] ' + history + '</p>'
+      );
+    }
+
+    // -------------------
+
+    var body = $('body');
+
+    // Show Edit-column-Form
+    body.delegate('.edit-column', 'click', function (e) {
+      e.preventDefault();
+
+      var content = $(this).closest('.sug-cont');
+      var name = content.find('.col-name').text();
+      var column_id = +content.attr('data-column');
+      var page_id = +content.attr('data-page');
+
+      var params = {
+        formTitle: 'Edit "' + name + '" column',
+        column_id: column_id,
+        page_id: page_id,
+        name: name,
+        status: 2
+      };
+
+      $('#column-form-template').tmpl(params).appendTo('body');
+      $('#add-column-form').modal('show');
+    });
+
+    // Save column
+    body.delegate('#save-column', 'click', function () {
+      var form = $('#column-form');
+      clearFormErrors(form);
+      if (!checkForEmptyField(form.find('[name="name"]'))) return false;
+
+      var column_id = +form.find('[name="column_id"]').val();
+
+      $.ajax({
+        url: '/admin/page/save_column',
+        type: 'POST',
+        dataType: 'json',
+        async: true,
+        data: form.serialize(),
+        success: function (response) {
+          console.log(response);
+          location.reload();
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+
+      $('#add-column-form').modal('hide');
+      $('.modal').remove();
+    });
+
+    // Delete column
+    body.delegate('#delete-column', 'click', function () {
+      var form = $('#column-form');
+      var column_id = form.find('[name="column_id"]').val();
+      var column = $('.suggested-content').find('div[data-column="' + column_id + '"]');
+      proccessOne(column, '/admin/suggest/decline');
+
+      $('#add-column-form').modal('hide');
+      $('.modal').remove();
+    });
+
+    // Delete item
+    body.delegate('#delete-item', 'click', function () {
+      var form = $('#item-form');
+      var item_id = form.find('[name="item_id"]').val();
+      var item = $('.suggested-content').find('div[data-item="' + item_id + '"]');
+      proccessOne(item, '/admin/suggest/decline');
+
+      $('#add-item-form').modal('hide');
+      $('.modal').remove();
+    });
+
+    // ------------------
+
+    body.delegate('.edit-item', 'click', function () {
+      var content = $(this).closest('.sug-cont');
+
+      var page_id = content.attr('data-page');
+
+      console.log(page_id);
+
+      if (!page_id) return false;
+
+      var params = {
+        formTitle: 'Edit item',
+        page_id: page_id,
+        item_id: content.attr('data-item'),
+        title: content.find('.title').text(),
+        img: content.find('img').attr('src'),
+        description: content.attr('data-description'),
+        link: content.attr('data-link'),
+        status: 2
+      };
+
+      $('#item-form-template').tmpl(params).appendTo('body');
+      $('#add-item-form').modal('show');
+    });
+
+    // Save Item
+    body.delegate('#save-item', 'click', function () {
+      var form = $('#item-form');
+      clearFormErrors(form);
+      if (!checkForEmptyField(form.find('[name="title"]'))) return false;
+
+      var item_id = +form.find('[name="item_id"]').val();
+      var itemForm = document.querySelector('form');
+      var form_data = new FormData(itemForm);
+
+      $.ajax({
+        url: '/admin/page/save_item',
+        type: 'POST',
+        cache: false,
+        contentType: false,
+        processData: false,
+        data: form_data,
+        success: function (result) {
+          console.log(result);
+          location.reload();
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+
+      $('#add-item-form').modal('hide');
+      $('.modal').remove();
+    });
+
+    // ----------------
+
+    $('.clear-history').click(function(){
+      if (confirm(msg)) {
+        $.ajax({
+          url: '/admin/suggest/clear_history',
+          type: 'POST',
+          dataType: 'json',
+          async: true,
+          data: {clear_history: true},
+          success: function (result) {
+            console.log(result);
+            $('.suggest-history').empty();
+          },
+          error: function (xhr, textStatus, errorThrown) {
+            console.log(xhr, textStatus, errorThrown);
+          }
+        });
+      }
+    });
+
+    function clearFormErrors(form) {
+      form.find('.has-error').removeClass('has-error');
+    }
+
+    function checkForEmptyField(input) {
+      var len = input.val().length;
+      if (len <= 0) {
+        input.addClass('has-error');
+        return false;
+      }
+      return true;
+    }
+
+    $('.show-hide').click(function(){
+      $(this).next('div').toggleClass('hidden');
+    });
+
+    body.on('hidden.bs.modal', '.modal', function () {
+      $('.modal').remove();
+    });
+
+  });
+</script>

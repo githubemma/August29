@@ -1,0 +1,9 @@
+<li class="slides-in" data-no-turbolink>
+    <a href="page/<%= page.slug ? page.slug : page.id %>">
+      <img src="<%= page.img.slide.url %>" class="img-responsive" alt="<%= page.title %>">
+      <div class="project-info">
+        <p class="item-title"><%= page.title %></p>
+        <p class="item-desc"><%= page.description %></p>
+      </div>
+    </a>
+</li>

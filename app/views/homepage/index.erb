@@ -1,0 +1,509 @@
+<% content_for :header do %>
+    <%= javascript_include_tag 'admin' %>
+<% end %>
+
+<div class="container admin small-padding">
+
+  <div class="row admin-wrapper">
+    <!-- left column -->
+    <div class="left-column">
+      <%= render :partial => 'admin/menu' %>
+
+      <div class="button-wide">
+        <button class="primary-button" id="add-category">Add Category</button>
+      </div>
+
+      <ul class="list-unstyled category-list active-list">
+        <% @categories.each do |c| %>
+        <li data-category_id="<%= c.id %>" data-img="<%= c.img.url %>"
+            data-original-img="<%= c.img.filename %>"><span class="c-name"><%= c.name %></span>
+          <a class="edit-category" href="#">edit</a>
+        </li>
+        <% end %>
+      </ul>
+    </div>
+
+    <!-- content -->
+    <div class="admin-content">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="row">
+            <div class="pull-left">
+              <h4>Total individual pages: <%= @pages.count %></h4>
+            </div>
+            <div class="pull-right" data-no-turbolink>
+              <a href="/" class="fs-16 bold">Homepage</a>&nbsp;&nbsp;
+              <button class="btn btn-sm btn-success" id="save-homepage-content">
+                <i class="fa fa-floppy-o"></i> Save homepage</button>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="pull-left">
+              <h4><span class="hidden" id="category-name"></span>&nbsp;</h4>
+            </div>
+            <div class="pull-right">
+              <button class="primary-button hidden" id="category-to-homepage">
+                <i class="fa fa-arrow-down"></i> Add category to the homepage</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-10">
+        <div class="col-xs-12">
+          <div class="row"><button class="category-items-control">show/hide page items</button></div>
+          <div class="row category-items">
+
+            <% @pages.each do |p| %>
+            <div class="col-xs-2">
+              <div class="small-item" data-page_id="<%= p.id %>">
+                <% if p.img.slide.url.present? %>
+                <img src="<%= p.img.slide.url %>" alt="<%= p.title %>">
+                <% end %>
+                <div class="item-desc">
+                  <div class="title"><%= p.title %></div>
+                </div>
+                <button class="secondary-button fs-11 to-category">To Category</button>
+              </div>
+            </div>
+            <% end %>
+
+          </div>
+        </div>
+
+        <div class="col-xs-12 homepage-categories ui-sortable">
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Category-form template -->
+<script id="category-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'category/category_form' %>
+</script>
+
+<!-- Page template -->
+<script id="page-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'page/page' %>
+</script>
+
+<!-- Column template -->
+<script id="column-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'column/column' %>
+</script>
+
+<script>
+  $(function () {
+    var body = $('body');
+
+    // Load homepage content
+    function loadHomepageContent() {
+      $.ajax({
+        type: 'GET',
+        url: '/admin/homepage/get_homepage_content',
+        dataType: 'json',
+        success: function (result) {
+          console.log(result);
+
+          if (result.categories != undefined) {
+            renderCategories(result.categories, result.pages );
+          }
+
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+    }
+    loadHomepageContent();
+
+    // Init drag and drop lists
+    $(".homepage-categories").sortable({
+      revert: true
+    });
+
+    function initDragDropItems() {
+      $(".sortable-items").find('.row').sortable({
+        revert: true
+      });
+    }
+    initDragDropItems();
+
+    // Show/Hide content
+    body.delegate('.show-hide', 'click', function(){
+      $(this).parent().parent().next().toggleClass('hidden');
+    });
+
+    // Show/Hide page items
+    $('.category-items-control').click(function(){
+      $('.category-items').toggleClass('hidden');
+    });
+
+    // Remove column
+    body.delegate('.remove-category', 'click', function(){
+      $(this).closest('.column').remove();
+    });
+
+    // Allow to add pagges to the category
+    body.delegate('.allow-add', 'click', function(){
+      var control = $(this).closest('.sortable-control');
+      var isActive = control.hasClass('active');
+
+      $('.homepage-categories').find('.active').removeClass('active');
+
+      if (isActive) {
+        control.removeClass('active');
+        control.next().addClass('hidden');
+      } else {
+        control.addClass('active');
+        control.next().removeClass('hidden');
+      }
+
+    });
+
+    // ------- HOMEPAGE ---------
+
+    // Save categories and pages
+    $('#save-homepage-content').click(function(){
+      var button = $(this);
+
+      $.ajax({
+        url: '/admin/homepage/save_homepage_content',
+        type: 'POST',
+        dataType: 'json',
+        async: true,
+        data: getHomepageParamsString(),
+        beforeSend: function() {
+          button.attr('disabled', true);
+        },
+        complete: function() {
+          button.attr('disabled', false);
+        },
+        success: function (response) {
+          console.log(response);
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+    });
+
+    // ------- CATEGORY ---------
+
+    // Add category to the homepage
+    $('#category-to-homepage').click(function(){
+      var category_id = +$('.category-list').find('.current').attr('data-category_id');
+
+      if (!category_id) return false;
+
+      var categories = $('.homepage-categories');
+
+      var exist = categories.find('[data-column_id="' + category_id + '"]');
+      if (exist.length) {
+        exist.find('.column-items').removeClass('hidden');
+      } else {
+        var category = {
+          id: category_id,
+          name: $('#category-name').text()
+        };
+
+        $('#column-template').tmpl(category).appendTo(categories);
+        initDragDropItems();
+      }
+    });
+
+    // Show Add-Category-Form
+    $('#add-category').click(function () {
+      var params = {
+        formTitle: 'Add new category',
+        category_id: '',
+        name: '',
+        img: ''
+      };
+      $('#category-form-template').tmpl(params).appendTo('body');
+      $('#add-category-form').modal('show');
+    });
+
+    // Show Edit-Category-Form
+    body.delegate('.edit-category', 'click', function (e) {
+      e.preventDefault();
+      var category = $(this).parent();
+      var name = category.find('.c-name').text();
+
+      var params = {
+        formTitle: 'Edit "' + name + '" category',
+        category_id: category.attr('data-category_id'),
+        img: category.attr('data-img'),
+        originalImg: category.attr('data-original-img'),
+        name: name
+      };
+
+      $('#category-form-template').tmpl(params).appendTo('body');
+      $('#add-category-form').modal('show');
+    });
+
+    // Save category
+    body.delegate('#save-category', 'click', function () {
+      var form = $('#category-form');
+      clearFormErrors(form);
+      if (!checkForEmptyField(form.find('[name="name"]'))) return false;
+
+      var categoryForm = document.querySelector('form');
+      var form_data = new FormData(categoryForm);
+
+      $.ajax({
+        url: '/admin/homepage/save_category',
+        type: 'POST',
+        cache: false,
+        contentType: false,
+        processData: false,
+        data: form_data,
+        success: function (response) {
+          console.log(response);
+          var category = response.category;
+          var categoryList = $('.category-list');
+
+          var rowName = '<span class="c-name">' + category.name + '</span>';
+          rowName += ' <a class="edit-category" href="#">edit</a></li>';
+          var img = (category.img.thumb.url) ? category.img.thumb.url : '';
+
+          if (response.new != undefined) {
+            categoryList.append(
+                '<li data-category_id="' + category.id + '"' +
+                ' data-img="' + img + '">' +
+                rowName
+            );
+          } else {
+            var row = categoryList.find('li[data-category_id="' + category.id + '"]');
+            row.html(rowName);
+            row.attr('data-img', img);
+          }
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+
+      $('#add-category-form').modal('hide');
+      $('.modal').remove();
+    });
+
+    // Delete category
+    body.delegate('#delete-category', 'click', function () {
+      var message = 'Are you sure you want to delete the category?';
+
+      if (confirm(message)) {
+        $.ajax({
+          url: '/admin/homepage/delete_category',
+          type: 'POST',
+          dataType: 'json',
+          async: true,
+          data: $('#category-form').serialize(),
+          success: function (response) {
+            console.log(response);
+            var categoryList = $('.category-list');
+
+            if (response.category_id != undefined) {
+              categoryList.find('li[data-category_id="' + response.category_id + '"]').remove();
+
+              // Clear items
+              $('.category-items').empty();
+            }
+          },
+          error: function (xhr, textStatus, errorThrown) {
+            console.log(xhr, textStatus, errorThrown);
+          }
+        });
+
+        $('#add-category-form').modal('hide');
+        $('.modal').remove();
+      }
+    });
+
+    function getHomepageParamsString() {
+      var data = '';
+      var categories = $('.column');
+
+      var len = categories.length;
+      for (var i = 0; i < len; i++) {
+        var category = $(categories[i]);
+        var category_id = +category.attr('data-column_id');
+
+        if (category_id) {
+          data += '&[categories][' + i + '][category_id]=' + category_id;
+          data += '&[categories][' + i + '][category_order]=' + i;
+
+          var pages = category.find('div[data-page_id]');
+          var pLen = pages.length;
+
+          for (var j = 0; j < pLen; j++) {
+            var page_id = $(pages[j]).attr('data-page_id');
+
+            data += '&[categories][' + i + '][pages][' + j + '][category_id]=' + category_id;
+            data += '&[categories][' + i + '][pages][' + j + '][page_id]=' + page_id;
+            data += '&[categories][' + i + '][pages][' + j + '][page_order]=' + j;
+          }
+        }
+      }
+
+      return data;
+    }
+
+//    function getCategoryItems(categoryItemsData) {
+//      var len = categoryItemsData.length;
+//      var categoryItems = [];
+//      for (var i = 0; i < len; i++) {
+//        categoryItems[categoryItemsData[i].column_id] = [];
+//      }
+//
+//      for (i = 0; i < len; i++) {
+//        var c = categoryItemsData[i];
+//        categoryItems[c.category_id].push({
+//          title: c.title,
+//          description: c.description,
+//          link: c.link,
+//          id: c.id,
+//          img: c.img,
+//          sb_text: 'Remove',
+//          sb_class: 'rm-from-category'
+//        });
+//      }
+//
+//      return categoryItems;
+//    }
+
+    // Get category info
+    $('.admin').delegate('.category-list li', 'click', function () {
+      var row = $(this);
+      var categoryName = $('#category-name');
+      categoryName.removeClass('hidden');
+      categoryName.text( row.find('.c-name').text() );
+      $('#category-to-homepage').removeClass('hidden');
+    });
+
+    // ------- PAGE ---------
+
+    // Add individual page to the category
+    body.delegate('.to-category', 'click', function(){
+      var page = $(this).closest('.small-item');
+      var page_id = +page.attr('data-page_id');
+      var activeCategory = $('.homepage-categories').find('.active');
+      var categoryPages = activeCategory.next();
+
+      if (!page_id || !activeCategory.length) return false;
+
+      var exist = activeCategory.next().find('div[data-page_id="' + page_id + '"]');
+      if (!exist.length) {
+        // var thumb = {thumb: {url: page.find('img').attr('src')}};
+        var img = page.find('img').attr('src');
+
+        var clone = {
+          id: page_id,
+          title: page.find('.title').text(),
+          img: img,
+          description: page.attr('data-description'),
+          sb_text: 'Remove',
+          sb_class: 'rm-from-category'
+        };
+
+        $('#page-template').tmpl(clone).appendTo(categoryPages.find('.row'));
+      }
+
+      categoryPages.removeClass('hidden');
+    });
+
+    // Remove item from column
+    body.delegate('.rm-from-category', 'click', function(){
+      $(this).closest('.small-item').parent().remove();
+    });
+
+    function clearFormErrors(form) {
+      form.find('.has-error').removeClass('has-error');
+    }
+
+    function checkForEmptyField(input) {
+      var len = input.val().length;
+      if (len <= 0) {
+        input.addClass('has-error');
+        return false;
+      }
+      return true;
+    }
+
+    function renderCategories(categoriesData, pagesData) {
+      var pages = getPages(pagesData);
+      var categoryWrapper = $('.homepage-categories');
+
+      // Render categories
+      var categories = [];
+      var len = categoriesData.length;
+      for (var i = 0; i < len; i++) {
+        var c = categoriesData[i];
+
+        categories[i] = {
+          pages: pages[c.id],
+          id: c.id,
+          name: c.name
+        };
+      }
+      $('#column-template').tmpl(categories).appendTo(categoryWrapper);
+
+      // Render pages from categories
+      len = categories.length;
+      for (i = 0; i < len; i++) {
+        var append = categoryWrapper.find('div[data-column_id="' + categories[i].id + '"]')
+            .find('.column-items').find('.row');
+        if (categories[i].pages != undefined) {
+          $('#page-template').tmpl(categories[i].pages).appendTo(append);
+        }
+      }
+
+      initDragDropItems();
+    }
+
+    function getPages(pagesData) {
+      var len = pagesData.length;
+
+      var pages = [];
+      for (var i = 0; i < len; i++) {
+        pages[pagesData[i].category_id] = [];
+      }
+
+      for (i = 0; i < len; i++) {
+        var c = pagesData[i];
+        pages[c.category_id].push({
+          title: c.title,
+          description: c.description,
+          id: c.id,
+          img: c.img.slide.url,
+          sb_text: 'Remove',
+          sb_class: 'rm-from-category'
+        });
+      }
+
+      return pages;
+    }
+
+    // ----------------
+
+    // Makes active row in list
+    body.delegate('.active-list li', 'click', function(){
+      var row = $(this);
+      if (!row.hasClass('current')) {
+        var ul = row.closest('.active-list');
+        ul.find('li').removeClass('current');
+        row.addClass('current');
+      }
+    });
+
+    body.on('hidden.bs.modal', '.modal', function () {
+      $('.modal').remove();
+    });
+
+  });
+</script>

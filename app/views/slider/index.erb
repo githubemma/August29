@@ -1,0 +1,503 @@
+<% content_for :header do %>
+    <%= javascript_include_tag 'admin' %>
+<% end %>
+
+<div class="container admin small-padding">
+
+  <div class="row admin-wrapper">
+    <!-- left column -->
+    <div class="left-column">
+      <%= render :partial => 'admin/menu' %>
+
+      <hr>
+      <div class="button-wide">
+        <button class="secondary-button" id="assign-slider">
+          <i class="fa fa-thumb-tack"></i> Assign sliders</button>
+        <button class="primary-button mt-10" id="add-slider">Add slider</button>
+      </div>
+
+      <ul class="list-unstyled slider-list active-list mt-20">
+        <% @sliders.each do |s| %>
+        <li data-slider_id="<%= s.id %>" data-speed="<%= s.speed %>" data-duration="<%= s.duration %>"
+            data-height="<%= s.height %>"><span class="slider-name"><%= s.name %></span>
+          <a class="edit-slider" href="#">edit</a>
+        </li>
+        <% end %>
+      </ul>
+
+    </div>
+
+    <!-- content -->
+    <div class="admin-content">
+      <div class="row">
+        <div class="col-xs-12 bb-2">
+          <div class="row">
+            <div class="pull-left">
+              <input type="hidden" id="slider_id">
+              <h4><span id="slider-name"></span>&nbsp;</h4>
+            </div>
+
+            <div class="pull-right">
+              <button class="btn btn-sm btn-success hidden" id="save-slider-images">
+                <i class="fa fa-floppy-o"></i> Save slider</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-xs-12"></div>
+      </div>
+
+      <div class="row mt-10">
+
+      <form id="form-upload" enctype="multipart/form-data">
+        <table class="table table-bordered hidden" id="slider-images">
+          <thead>
+          <tr>
+            <td>Image</td>
+            <td>Title, Sub header</td>
+            <td></td>
+          </tr>
+          </thead>
+          <tbody>
+
+          </tbody>
+          <tfoot>
+          <tr>
+            <td></td>
+            <td></td>
+            <td class="text-right"><button class="btn btn-sm btn-success add-image">
+              <i class="fa fa-plus"></i></button></td>
+          </tr>
+          </tfoot>
+        </table>
+      </form>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Category-form template -->
+<script id="slider-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'slider/slider_form' %>
+</script>
+
+<!-- slider-row template -->
+<script id="slider-row-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'slider/slider_row' %>
+</script>
+
+<!-- assing slider template -->
+<script id="assign-slider-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'slider/assign_slider_form' %>
+</script>
+
+<!-- crop-form template -->
+<script id="crop-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'slider/crop_form' %>
+</script>
+
+<script>
+$(function() {
+
+  var body = $('body');
+
+  // ------- UPLOAD IMAGE ---------
+
+  // Add row to table with images
+  body.delegate('.add-image', 'click', function(e){
+    e.preventDefault();
+    var appendTo = $('#slider-images').find('tbody');
+    var id = 'new_' + appendTo.find('tr').length;
+    $('#slider-row-template').tmpl({id: id, disabled: true}).appendTo(appendTo);
+  });
+
+  // Delete slider image
+  body.delegate('.remove-image', 'click', function(e){
+    e.preventDefault();
+    var row = $(this).closest('tr');
+    var image_id = row.attr('data-image_id');
+    row.remove();
+
+    $.ajax({
+      url: '/admin/slider/delete_slider_image',
+      type: 'POST',
+      dataType: 'json',
+      async: true,
+      data: {image_id: image_id},
+      success: function (result) {
+        console.log(result);
+      },
+      error: function (xhr, textStatus, errorThrown) {
+        console.log(xhr, textStatus, errorThrown);
+      }
+    });
+  });
+
+  // Select slider image
+  body.delegate('.upload-image', 'click', function(e) {
+    e.preventDefault();
+    var row = $(this).closest('tr');
+    var form = $('#form-upload');
+    var fileInput = row.find('input[type="file"]');
+
+    // Prevent cropping on unsaved image
+    row.find('.crop').removeClass('crop').attr('disabled', true);
+
+    fileInput.trigger('click');
+  });
+
+  // Show preview of the uploaded image
+  body.delegate('#form-upload input[type="file"]', 'change', function() {
+    var input = $(this);
+    var row = input.closest('tr');
+    var preview = row.find('img');
+
+    var img = input[0].files[0];
+    var reader = new FileReader();
+    reader.onload = function(e){
+      image_base64 = e.target.result;
+      preview.attr("src", image_base64);
+    };
+    reader.readAsDataURL(img);
+  });
+
+  // ------- SLIDER ---------
+
+  $('#save-slider-images').click(function(){
+    var button = $(this);
+    var slider_id = $('#slider_id').val();
+    var uploadForm = document.querySelector('form');
+    var form_data = new FormData(uploadForm);
+    form_data.append('slider_id', slider_id);
+
+    $.ajax({
+      url: '/admin/slider/save_slider_images',
+      type: 'POST',
+      cache: false,
+      contentType: false,
+      processData: false,
+      data: form_data,
+      beforeSend: function() {
+        button.attr('disabled', true);
+      },
+      complete: function() {
+        button.attr('disabled', false);
+      },
+      success: function (result) {
+        console.log(result);
+
+        getSliderImages(slider_id);
+      },
+      error: function (xhr, textStatus, errorThrown) {
+        console.log(xhr, textStatus, errorThrown);
+      }
+    });
+  });
+
+  // Show slider images
+  body.delegate('.slider-list li', 'click', function(){
+    var row = $(this);
+    var id = row.attr('data-slider_id');
+    var name = row.find('.slider-name').text();
+
+    getSliderImages(id);
+
+    $('#save-slider-images').removeClass('hidden');
+    $('#slider-name').text(name);
+    $('#slider_id').val(id);
+  });
+
+  function getSliderImages(slider_id) {
+    $.ajax({
+      url: '/admin/slider/get_images',
+      type: 'GET',
+      dataType: 'json',
+      async: true,
+      data: {slider_id: slider_id},
+      success: function (result) {
+        console.log(result);
+
+        var table = $('#slider-images');
+        table.removeClass('hidden');
+        var appendTo = table.find('tbody');
+
+        appendTo.empty();
+
+        if (result.images && result.images.length) {
+          $('#slider-row-template').tmpl(result.images).appendTo(appendTo);
+        }
+      },
+      error: function (xhr, textStatus, errorThrown) {
+        console.log(xhr, textStatus, errorThrown);
+      }
+    });
+  }
+
+  // Show Add-slider-Form
+  $('#add-slider').click(function () {
+    var params = {
+      formTitle: 'Add new slider',
+      slider_id: '',
+      name: ''
+    };
+    $('#slider-form-template').tmpl(params).appendTo('body');
+    $('#add-slider-form').modal('show');
+  });
+
+  // Show Edit-slider-Form
+  body.delegate('.edit-slider', 'click', function (e) {
+    e.preventDefault();
+    var slider = $(this).parent();
+    var name = slider.find('.slider-name').text();
+
+    var params = {
+      formTitle: 'Edit "' + name + '" slider',
+      slider_id: slider.attr('data-slider_id'),
+      speed: slider.attr('data-speed'),
+      duration: slider.attr('data-duration'),
+      height: slider.attr('data-height'),
+      name: name
+    };
+
+    $('#slider-form-template').tmpl(params).appendTo('body');
+    $('#add-slider-form').modal('show');
+  });
+
+  // Delete slider
+  body.delegate('#delete-slider', 'click', function () {
+    var message = 'Are you sure you want to delete the slider?';
+
+    if (confirm(message)) {
+      $.ajax({
+        url: '/admin/slider/delete_slider',
+        type: 'POST',
+        dataType: 'json',
+        async: true,
+        data: $('#slider-form').serialize(),
+        success: function (response) {
+          console.log(response);
+          var sliderList = $('.slider-list');
+
+          if (response.slider_id != undefined) {
+            var attr = '[data-slider_id="' + response.slider_id + '"]';
+            sliderList.find('li' + attr).remove();
+          }
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+
+      $('#add-slider-form').modal('hide');
+      $('.modal').remove();
+    }
+  });
+
+  // Save slider
+  body.delegate('#save-slider', 'click', function () {
+    var button = $(this);
+    var form = $('#slider-form');
+    clearFormErrors(form);
+    if (!checkForEmptyField(form.find('[name="name"]'))) return false;
+
+    $.ajax({
+      url: '/admin/slider/save_slider',
+      type: 'POST',
+      dataType: 'json',
+      async: true,
+      data: form.serialize(),
+      beforeSend: function() {
+        button.attr('disabled', true);
+      },
+      complete: function() {
+        button.attr('disabled', false);
+      },
+      success: function (response) {
+        console.log(response);
+        var slider = response.slider;
+        var sliderList = $('.slider-list');
+
+        if (response.new != undefined) {
+          addNewSliderRow(slider, sliderList)
+        } else {
+          updateSliderRow(slider, sliderList);
+        }
+      },
+      error: function (xhr, textStatus, errorThrown) {
+        console.log(xhr, textStatus, errorThrown);
+      }
+    });
+
+    $('#add-slider-form').modal('hide');
+    $('.modal').remove();
+  });
+
+  function addNewSliderRow(slider, sliderList) {
+    sliderList.append(
+        '<li data-slider_id="' + slider.id + '"' +
+        ' data-speed="' + slider.speed + '"' +
+        ' data-height="' + slider.height + '"' +
+        ' data-duration="' + slider.duration + '">' +
+        '<span class="slider-name">' + slider.name + '</span>' +
+        '<a class="edit-slider" href="#">edit</a></li>'
+    );
+  }
+
+  function updateSliderRow(slider, sliderList) {
+    var row = sliderList.find('li[data-slider_id="' + slider.id + '"]');
+    row.find('.slider-name').text(slider.name);
+    row.attr('data-speed', slider.speed);
+    row.attr('data-height', slider.height);
+    row.attr('data-duration', slider.duration);
+  }
+
+  // Show Crop form
+  $('#slider-images').delegate('.crop', 'click', function(e){
+    e.preventDefault();
+    var button = $(this);
+    var image_id = button.closest('tr').attr('data-image_id');
+    var img = button.prev('img');
+    var src = img.attr('data-original');
+    if (!src) {
+      src = img.attr('src');
+    }
+
+    var update = function(coords){
+      $('#crop_x').val(coords.x);
+      $('#crop_y').val(coords.y);
+      $('#crop_w').val(coords.w);
+      $('#crop_h').val(coords.h);
+    };
+
+    $('#crop-form-template').tmpl({image_id: image_id, img: src}).appendTo('body');
+    $('#crop-form').modal('show');
+    $('#crop_target').Jcrop({
+      onSelect: update,
+      onChange: update
+    });
+  });
+
+  // Show Assign-Slider-Form
+  body.delegate('#crop-image', 'click', function(){
+    var form = $('#crop-image-form');
+    var image_id = form.find('[name="image_id"]').val();
+
+    $.ajax({
+      url: '/admin/slider/crop_image',
+      type: 'POST',
+      dataType: 'json',
+      async: true,
+      data: form.serialize(),
+      success: function (response) {
+        console.log(response);
+
+        var row = $('#slider-images').find('tr[data-image_id="'+ image_id +'"]');
+
+        var img = row.find('img');
+        var src = img.attr('src');
+        var original = img.attr('data-original');
+        img.attr('src', '');
+        img.attr('src', src + '?' + +new Date());
+
+      },
+      error: function (xhr, textStatus, errorThrown) {
+        console.log(xhr, textStatus, errorThrown);
+      }
+    });
+
+    $('#crop-form').modal('hide');
+    $('.modal').remove();
+  });
+
+  // Show Assign-Slider-Form
+  $('#assign-slider').click(function(){
+    $.ajax({
+      url: '/admin/slider/get_pages',
+      type: 'GET',
+      dataType: 'json',
+      async: true,
+      success: function (response) {
+        var params = {
+          pages: response.pages,
+          sliders: getSliders()
+        };
+
+        $('#assign-slider-form-template').tmpl(params).appendTo('body');
+        $('#assign-slider-form').modal('show');
+      },
+      error: function (xhr, textStatus, errorThrown) {
+        console.log(xhr, textStatus, errorThrown);
+      }
+    });
+  });
+
+  // Assign sliders
+  body.delegate('#save-assign-slider', 'click', function(){
+    var form = $('#sliders-form');
+    $.ajax({
+      url: '/admin/slider/assign_sliders',
+      type: 'POST',
+      dataType: 'json',
+      async: true,
+      data: form.serialize(),
+      success: function (response) {
+        console.log(response);
+      },
+      error: function (xhr, textStatus, errorThrown) {
+        console.log(xhr, textStatus, errorThrown);
+      }
+    });
+
+    $('#assign-slider-form').modal('hide');
+    $('.modal').remove();
+  });
+
+  function getSliders() {
+    var sliderList = $('.slider-list');
+    var sliders = sliderList.find('li');
+    var data = {};
+    var len = sliders.length;
+    for (var i = 0; i < len; i++) {
+      var slider = $(sliders[i]);
+      var slider_id = slider.attr('data-slider_id');
+      data[slider_id] = {
+        sl_id: slider_id,
+        name: slider.find('.slider-name').text()
+      };
+    }
+    return data;
+  }
+
+  // --------------
+
+  function clearFormErrors(form) {
+    form.find('.has-error').removeClass('has-error');
+  }
+
+  function checkForEmptyField(input) {
+    var len = input.val().length;
+    if (len <= 0) {
+      input.addClass('has-error');
+      return false;
+    }
+    return true;
+  }
+
+  // Makes active row in list
+  body.delegate('.active-list li', 'click', function(){
+    var row = $(this);
+    if (!row.hasClass('current')) {
+      var ul = row.closest('.active-list');
+      ul.find('li').removeClass('current');
+      row.addClass('current');
+    }
+  });
+
+  body.on('hidden.bs.modal', '.modal', function () {
+    $('.modal').remove();
+  });
+
+
+});
+</script>

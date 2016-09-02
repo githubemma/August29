@@ -1,0 +1,390 @@
+<% content_for :header do %>
+    <%= javascript_include_tag 'admin' %>
+<% end %>
+
+<div class="container admin small-padding">
+
+  <div class="row admin-wrapper">
+    <!-- left column -->
+    <div class="left-column">
+      <%= render :partial => 'admin/menu' %>
+    </div>
+
+    <!-- content -->
+    <div class="admin-content">
+      <div class="row">
+
+        <div class="col-xs-12 bb-2">
+          <div class="row">
+            <div class="pull-left">
+              <h4>Reported content</h4>
+            </div>
+          </div>
+        </div>
+
+        <div class="reported-content">
+          <% @columns.each do |c|%>
+          <div class="col-xs-12 bb-2 mt-10 rep-cont" data-column="<%= c.col_id %>" data-page="<%= c.page_id %>">
+            <div class="row">
+              <div class="col-xs-3" style="padding-right: 15px;">
+                <h5><b>Column:</b> <span class="c-name"><%= c.col_name %></span></h5>
+              </div>
+
+              <div class="col-xs-3">
+                <div class="row">
+                  <div class="pull-left">
+                    <% slug = c.slug ? c.slug : c.id %>
+                    <h5 data-no-turbolink><b>Page:</b> <a href="/<%= slug %>"><%= c.title %></a></h5>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-xs-3">
+                <div class="row">
+                  <div class="pull-left">
+                    <p><%= c.created_at %></p>
+                    <h5><b>Name:</b> <%= c.name %></h5>
+                    <h5><b>Reason:</b> <%= c.reason %></h5>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-xs-3">
+                <div class="row">
+                  <div class="pull-right">
+                    <button class="btn btn-xs btn-default ignore">Ignore</button>
+                    <button class="btn btn-xs btn-primary edit">Edit</button>
+                    <button class="btn btn-xs btn-danger delete">Delete</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <% end %>
+
+          <hr>
+
+          <% @items.each do |i|%>
+          <div class="col-xs-12 bb-2 mt-10 rep-cont" data-item="<%= i.item_id %>" data-page="<%= i.page_id %>">
+            <div class="row">
+              <div class="col-xs-3" style="padding-right: 15px;">
+                <div class="item">
+                  <% if i.img.thumb.url %>
+                      <div class="img-wrapper">
+                        <img src="<%= i.img.thumb.url %>" data-original="<%= i.img.url %>">
+                      </div>
+                  <% end %>
+                  <div class="item-desc">
+                    <div class="title"><%= i.title %></div>
+                    <div class="desc"><%= i.description %></div>
+                  </div>
+                  <div class="clearfix"></div>
+                </div>
+              </div>
+
+              <div class="col-xs-3">
+                <div class="row">
+                  <div class="pull-left">
+                    <% slug = i.slug ? i.slug : i.id %>
+                    <h5 data-no-turbolink><b>Page:</b> <a href="/<%= slug %>"><%= i.page_title %></a></h5>
+                    <h5><b>Column:</b> <%= i.col_name %></h5>
+                    <p><b>Title:</b> <span class="i-title"><%= i.title %></span></p>
+                    <p><b>Description:</b> <span class="i-desc"><%= i.description %></span></p>
+                    <p data-no-turbolink><b>Link:</b> <a href="<%= i.link %>"><span class="i-link"><%= i.link %></span></a></p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-xs-3">
+                <div class="row">
+                  <div class="pull-left">
+                    <p><%= i.created_at %></p>
+                    <h5><b>Name:</b> <%= i.name %></h5>
+                    <h5><b>Reason:</b> <%= i.reason %></h5>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-xs-3">
+                <div class="row">
+                  <div class="pull-right">
+                    <button class="btn btn-xs btn-default ignore">Ignore</button>
+                    <button class="btn btn-xs btn-primary edit">Edit</button>
+                    <button class="btn btn-xs btn-danger delete">Delete</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <% end %>
+        </div>
+
+        <div class="clearfix"></div>
+
+        <div class="show-hide clr-blue fs-16 mt-20">History &nbsp;&nbsp;&nbsp;&nbsp;
+          <button class="btn btn-sm btn-danger clear-history">Clear History</button> </div>
+        <div class="report-history hidden">
+          <% @histories.each do |h|%>
+          <p class="clr-grey">[<%= h.created_at.strftime('%d-%m-%Y %H:%M') %>] <%=raw h.history %></p>
+          <% end %>
+        </div>
+
+      </div>
+    </div><!-- /admin-content -->
+
+  </div><!-- /admin-wrapper -->
+</div><!-- /admin -->
+
+<!-- Item-form template -->
+<script id="item-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'item/item_form' %>
+</script>
+
+<!-- Column-form template -->
+<script id="column-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'column/column_form' %>
+</script>
+
+<script>
+$(function() {
+  var msg = 'Are you sure ?';
+  var body = $('body');
+
+  // Edit
+  $('.edit').click(function(){
+    var content = $(this).closest('.rep-cont');
+    var params = {
+      formTitle: 'Edit content',
+      item_id: +content.attr('data-item'),
+      column_id: +content.attr('data-column'),
+      page_id: +content.attr('data-page')
+    };
+
+    if (params.item_id) {
+      params.type = 'item';
+      params.title = content.find('.i-title').text();
+      params.description = content.find('.i-desc').text();
+      params.link = content.find('.i-link').text();
+      params.img = content.find('img').attr('data-original');
+
+      $('#item-form-template').tmpl(params).appendTo('body');
+      $('#add-item-form').modal('show');
+    } else {
+      params.type = 'column';
+      params.name = content.find('.c-name').text();
+
+      $('#column-form-template').tmpl(params).appendTo('body');
+      $('#add-column-form').modal('show');
+    }
+  });
+
+  // -------------------
+
+  // Delete
+  $('.delete').click(function(){
+    proccessOne($(this), '/admin/report/delete');
+  });
+
+  // Ignore
+  $('.ignore').click(function(){
+    proccessOne($(this), '/admin/report/ignore');
+  });
+
+  // --------------------
+
+  // Save column
+  body.delegate('#save-column', 'click', function () {
+    var form = $('#column-form');
+    clearFormErrors(form);
+    if (!checkForEmptyField(form.find('[name="name"]'))) return false;
+
+    $.ajax({
+      url: '/admin/page/save_column',
+      type: 'POST',
+      dataType: 'json',
+      async: true,
+      data: form.serialize(),
+      success: function (response) {
+        console.log(response);
+        location.reload();
+      },
+      error: function (xhr, textStatus, errorThrown) {
+        console.log(xhr, textStatus, errorThrown);
+      }
+    });
+
+    $('#add-column-form').modal('hide');
+    $('.modal').remove();
+  });
+
+  // Delete column
+  body.delegate('#delete-column', 'click', function () {
+    var message = 'Are you sure you want to delete the column?';
+
+    if (confirm(message)) {
+      $.ajax({
+        url: '/admin/page/delete_column',
+        type: 'POST',
+        dataType: 'json',
+        async: true,
+        data: $('#column-form').serialize(),
+        success: function (response) {
+          console.log(response);
+          location.reload();
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+
+      $('#add-column-form').modal('hide');
+      $('.modal').remove();
+    }
+  });
+
+  // Save Item
+  body.delegate('#save-item', 'click', function () {
+    var form = $('#item-form');
+    clearFormErrors(form);
+    if (!checkForEmptyField(form.find('[name="title"]'))) return false;
+
+    var item_id = +form.find('[name="item_id"]').val();
+    var itemForm = document.querySelector('form');
+    var form_data = new FormData(itemForm);
+
+    $.ajax({
+      url: '/admin/page/save_item',
+      type: 'POST',
+      cache: false,
+      contentType: false,
+      processData: false,
+      data: form_data,
+      success: function (result) {
+        console.log(result);
+        location.reload();
+      },
+      error: function (xhr, textStatus, errorThrown) {
+        console.log(xhr, textStatus, errorThrown);
+      }
+    });
+
+    $('#add-item-form').modal('hide');
+    $('.modal').remove();
+  });
+
+  // Delete item
+  body.delegate('#delete-item', 'click', function () {
+    var message = 'Are you sure you want to delete the item?';
+    var item_id = +$('#item-form').find('[name="item_id"]').val();
+
+    if (confirm(message)) {
+      $.ajax({
+        url: '/admin/page/delete_item',
+        type: 'POST',
+        dataType: 'json',
+        async: true,
+        data: {item_id: item_id},
+        success: function (response) {
+          console.log(response);
+          location.reload();
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+
+      $('#add-item-form').modal('hide');
+      $('.modal').remove();
+    }
+  });
+
+  // --------------------
+
+  function proccessOne(button, url) {
+    if (confirm(msg)) {
+      var content = button.closest('.rep-cont');
+      var item_id = +content.attr('data-item');
+      var column_id = +content.attr('data-column');
+      var page_id = +content.attr('data-page');
+
+      if (item_id) {
+        var type = 'item';
+      } else {
+        type = 'column';
+      }
+
+      $.ajax({
+        url: url,
+        type: 'POST',
+        dataType: 'json',
+        async: true,
+        data: {type: type, item_id: item_id, column_id: column_id, page_id: page_id},
+        success: function (response) {
+          console.log(response);
+
+          removeContent(type, item_id, column_id);
+          addHistory(response.created_at, response.history);
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+    }
+  }
+
+  function removeContent(type, item_id, column_id) {
+    var wrapper = $('.reported-content');
+    if (type == 'item') {
+      wrapper.find('div[data-item="' + item_id + '"]').remove();
+    } else {
+      wrapper.find('div[data-column="' + column_id + '"]').remove();
+    }
+  }
+
+  function clearFormErrors(form) {
+    form.find('.has-error').removeClass('has-error');
+  }
+
+  function checkForEmptyField(input) {
+    var len = input.val().length;
+    if (len <= 0) {
+      input.addClass('has-error');
+      return false;
+    }
+    return true;
+  }
+
+  function addHistory(created_at, history) {
+    $('.report-history').prepend(
+        '<p class="clr-grey ">[' + created_at + '] ' + history + '</p>'
+    );
+  }
+
+  $('.clear-history').click(function(){
+    if (confirm(msg)) {
+      $.ajax({
+        url: '/admin/report/clear_history',
+        type: 'POST',
+        dataType: 'json',
+        async: true,
+        data: {clear_history: true},
+        success: function (result) {
+          console.log(result);
+          $('.report-history').empty();
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+    }
+  });
+
+  $('.show-hide').click(function(){
+    $(this).next('div').toggleClass('hidden');
+  });
+
+  body.on('hidden.bs.modal', '.modal', function () {
+    $('.modal').remove();
+  });
+});
+</script>

@@ -1,0 +1,60 @@
+<div id="add-page-form" class="modal" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <b>${formTitle}</b>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form enctype="multipart/form-data" id="page-form" class="mb-20">
+
+          <input type="hidden" name="page_id" value="${page_id}">
+
+          <div class="form-group">
+            <label for="title">Page title</label>
+            <input type="text" name="title" class="form-control" id="title" value="${title}">
+          </div>
+
+          <div class="form-group">
+            <label for="description">Page Description</label>
+            <!--<input type="text" name="description" class="form-control" id="description" value="${description}">-->
+            <textarea name="description" class="form-control" id="description" cols="30" rows="5">${description}</textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="tag">Tags</label>
+            <input type="text" name="tag" class="form-control" id="tag" value="${tag}">
+            <small>e.g. euro, eurovelo, eurovelo 13 (limit 255 characters)</small>
+          </div>
+
+          {{if img}}
+          <div class="preview">
+            <img src="${img}" alt="${title}" class="img-thumbnail">
+          </div>
+          {{/if}}
+
+          <div class="form-group">
+            <label for="img">Image: ${originalImg}</label>
+            <input type="file" name="img" id="img" value="">
+          </div>
+        </form>
+
+        <div class="row">
+          <div class="modal-footer">
+            <div class="pull-left">
+              <button class="secondary-button" data-dismiss="modal">Cancel</button>
+            </div>
+
+            <div class="pull-right">
+              {{if page_id}}
+              <button class="btn btn-sm btn-danger" id="delete-page">Delete Page</button>
+              {{/if}}
+              <button class="primary-button" id="save-page">Save</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

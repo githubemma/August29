@@ -1,0 +1,49 @@
+<div id="add-twitter-feed-form" class="modal" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <b>Twitter feed</b>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="twitter-feed-form" class="mb-20">
+
+          <input name="page_id" type="hidden" value="${page_id}">
+          <input name="twitter_feed_id" type="hidden" value="${twitter_feed_id}">
+
+          <div class="form-group required">
+            <label for="name">Title (e.g. #eurovelo13 Tweets)</label>
+            <input type="text" name="title" class="form-control input-title" id="input-title" value="${title}">
+          </div>
+
+          <div class="form-group required">
+            <label for="name">Hashtag (e.g. eurovelo13)</label>
+            <input type="text" name="hashtag" class="form-control input-hashtag" id="input-hashtag" value="${hashtag}">
+          </div>
+
+          <div class="form-group required">
+            <label for="name">Widget (e.g. 720695864965120001)</label>
+            <input type="text" name="widget" class="form-control input-widget" id="input-widget" value="${widget}">
+          </div>
+
+        </form>
+
+        <div class="row">
+          <div class="modal-footer">
+            <div class="pull-left">
+              <button class="secondary-button" data-dismiss="modal">Cancel</button>
+            </div>
+
+            <div class="pull-right">
+              {{if twitter_feed_id}}
+              <button class="btn btn-sm btn-danger" id="delete-twitter-feed">Delete twitter feed</button>
+              {{/if}}
+              <button class="primary-button" id="save-twitter-feed">Save</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

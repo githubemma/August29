@@ -1,0 +1,10 @@
+<% if @pages[category.id]  %>
+<div class="row category hidden" id="category-<%= category.id %>">
+  <div class="category-title hidden"> <%= category.name %></div>
+
+  <% @pages[category.id].each do |k, page| %>
+    <%= render partial: 'item/category_item', :locals => {page: page, category_id: category.id} %>
+  <% end %>
+
+</div>
+<% end %>

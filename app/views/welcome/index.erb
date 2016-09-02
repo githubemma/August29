@@ -1,0 +1,526 @@
+<!-- slider -->
+<% if @slider %>
+    <div class="cycle-slideshow homepage-slider desktop-slider"
+         data-cycle-fx="fadeout"
+         data-cycle-speed="<%= @slider.speed %>"
+         data-timeout="<%= @slider.duration %>"
+         data-cycle-carousel-fluid=true
+         data-cycle-overlay-template="<div class=cycle-title><span>{{title}}</span><p class=sub-header>{{sub_header}}</p></div><div class=image-source>{{source}}</div>">
+      <div class="cycle-overlay custom"></div>
+      <% @slider_images.each do |s| %>
+          <% title = (s.title != '') ? s.title : @slider.name %>
+          <img src="<%= s.img.banner.url %>" alt="<%= s.title %>" data-title="<%= title %>"
+               data-sub_header="<%= s.sub_header %>" data-source="<%= s.source %>">
+      <% end %>
+    </div>
+
+    <div class="cycle-slideshow homepage-slider tab-slider"
+         data-cycle-fx="fadeout"
+         data-cycle-speed="<%= @slider.speed %>"
+         data-timeout="<%= @slider.duration %>"
+         data-cycle-overlay-template="<div class=cycle-title><span>{{title}}</span><p class=sub-header>{{sub_header}}</p></div><div class=image-source>{{source}}</div>">
+      <div class="cycle-overlay custom"></div>
+      <% @slider_images.each do |s| %>
+          <% title = (s.title != '') ? s.title : @slider.name %>
+          <img src="<%= s.img.tab_banner.url %>" alt="<%= s.title %>" data-title="<%= title %>"
+               data-sub_header="<%= s.sub_header %>" data-source="<%= s.source %>">
+      <% end %>
+    </div>
+
+    <div class="cycle-slideshow homepage-slider mobile-slider"
+         data-cycle-fx="fadeout"
+         data-cycle-speed="<%= @slider.speed %>"
+         data-timeout="<%= @slider.duration %>"
+         data-cycle-overlay-template="<div class=cycle-title><span>{{title}}</span><p class=sub-header>{{sub_header}}</p></div><div class=image-source>{{source}}</div>">
+      <div class="cycle-overlay custom"></div>
+      <% @slider_images.each do |s| %>
+          <% title = (s.title != '') ? s.title : @slider.name %>
+          <img src="<%= s.img.mobile_banner.url %>" alt="<%= s.title %>" data-title="<%= title %>"
+               data-sub_header="<%= s.sub_header %>" data-source="<%= s.source %>">
+      <% end %>
+    </div>
+<% end %>
+
+<div class="logo" data-no-turbolink>
+  <a href="/"><img class="desktop-logo" src="/assets/desk_logo_last.png" alt="Bela Info"></a>
+  <a href="/"><img class="mobile-logo" src="/assets/mobile_logo_last.png" alt="Bela Info"></a>
+  <div class="home-header hidden-xs">Info in one place</div>
+</div>
+
+<div class="page-control col-xs-12">
+  <div class="search-bar text-right">
+    <div class="input-group">
+      <span class="input-group-addon clear-result"><i class="fa fa-arrow-left"></i></span>
+      <input type="search" class="form-control" id="search" name="search" placeholder="Search">
+      <span class="hidden" id="clear-search"><i class="fa fa-times"></i></span>
+    </div>
+    <small class="clr-grey hidden" id="min-chars">min 3 characters</small>
+  </div>
+</div>
+
+<div class="col-xs-12">
+  <div class="container">
+    <div class="row categories homepage-categories-box">
+
+      <!-- Search results -->
+      <div class="clr-blue fs-16 mb-15 mt-5 bold hidden" id="search-for"></div>
+      <div class="row category" id="search-block">
+        <div class="category-title hidden">"<span></span>" pages</div>
+      </div>
+
+      <div class="category-list">
+        <% @categories.each do |c| %>
+            <% if @pages && @pages[c[:id]].present? %>
+                <div class="text-center category-box no-description">
+                  <% image = c.img.slide.url ? c.img.slide.url : 'assets/no_image.jpg' %>
+
+                  <div class="category-box-trigger" style="cursor: pointer;" data-name="<%= c.name %>" data-category="<%= c.id %>">
+                    <div class="img-wrapper">
+                      <img src="<%= image %>" alt="" class="img-responsive">
+                    </div>
+                  </div>
+
+                  <a href="#" data-name="<%= c.name %>" data-category="<%= c.id %>" class="name"><%= c.name %></a>
+                </div>
+            <% end %>
+        <% end %>
+      </div>
+
+      <% @categories.each do |category| %>
+          <% if @pages && @pages[category[:id]].present? %>
+              <%= render :partial => 'category/category2', :locals => {category: category} %>
+          <% end %>
+      <% end %>
+
+      <!-- No results -->
+      <div class="row category text-center hidden" id="no-result">
+        <div class="text-center fs-16 clr-dark-grey mt-10" id="no-pages-for">There are currently no pages for '<span class="no-pages-for"></span>'</div>
+
+        <div class="col-xs-12 text-right" id="request-page-block">
+          <div class="input-group">
+            <input type="text" class="form-control" id="request-page-content" placeholder="Suggest a page name">
+            <span class="input-group-btn">
+              <button class="btn btn-secondary" id="request-page"><i class="fa fa-arrow-right"></i></button>
+            </span>
+          </div>
+
+          <small class="clr-red hidden">min 3 characters</small>
+        </div>
+
+        <div class="col-xs-12 fs-18 mt-20 mb-30 hidden" id="request-done">Sent</div>
+        <div class="col-xs-12 random-categories"></div>
+      </div>
+
+    </div><!-- /row -->
+  </div><!-- /container -->
+</div><!-- /col-xs-12 -->
+
+<div class="privacy hidden">
+  <div class="pull-right pointer"><i class="fa fa-times"></i></div>
+  <p class="mt-10 mb-15">We use cookies</p>
+  <p>Please see our Privacy Policy</p>
+</div>
+
+<!-- Article template -->
+<script id="article-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'article/article' %>
+</script>
+
+<script>
+  $(function () {
+    var body = $('body');
+
+    // Make active category by click
+    $(document).delegate('.category-box-trigger', 'click', function () {
+      var category = $(this);
+      var name = category.attr('data-name');
+      var id = category.attr('data-category');
+      var active = $('.active-category');
+      var categories = $('#category-' + id);
+      var boxes = categories.find('.category-box:not(.bookmark)');
+      var categoryList = $('.category-list:not(.bookmarks-list)');
+
+      $('#search-for').removeClass('hidden').text(name);
+
+      $('.placeholder').addClass('hidden');
+      active.removeClass('hidden');
+
+      $('.clear-result').addClass('active-btn');
+
+      categoryList.addClass('hidden');
+      categoryList.find('.category-box:not(.bookmark)').css({opacity: 0});
+
+      categories.removeClass('hidden').addClass('active');
+
+      boxes.each(function (i) {
+        var time = (100 * i);
+        animateItem($(this), time);
+      });
+    });
+
+    $('.category .category-box:not(.bookmark) a').click(function () {
+      // Set up storage
+      sessionStorage.setItem('active', $(this).attr('data-category'));
+    });
+
+    // Remove active category
+    $('.active-category, .clear-result').click(function () {
+      var active = $('.active');
+      var categoryList = $('.category-list:not(.bookmarks-list)');
+
+      $('.active-category').addClass('hidden');
+      $('#search-for').addClass('hidden');
+
+      $('#min-chars').addClass('hidden');
+
+      $('.clear-result').removeClass('active-btn');
+
+      $('.placeholder').removeClass('hidden');
+      active.addClass('hidden').removeClass('active');
+      active.find('.category-box:not(.bookmark)').css({opacity: 0});
+      categoryList.removeClass('hidden');
+
+      var boxes = categoryList.find('.category-box:not(.bookmark)');
+      boxes.each(function (i) {
+        var time = (100 * i);
+        animateItem($(this), time);
+      });
+
+      // Clear storage
+      sessionStorage.setItem('active', '');
+    });
+
+    // Show article
+    $(document).delegate('.article-trigger', 'click', function () {
+      $.ajax({
+        url: '/get_article',
+        type: 'GET',
+        dataType: 'json',
+        async: true,
+        data: {article_id: $(this).attr('data-article_id')},
+        success: function (result) {
+          if (result) {
+            var params = {
+              header: result.header,
+              text: result.text
+            };
+
+            $('#article-template').tmpl(params).appendTo('body');
+            $('#article').modal('show');
+          }
+        }
+      });
+    });
+
+    // ---------------
+
+    // Search
+    var search = $('#search');
+    search.keyup(function (e) {
+      var button = $('#clear-search');
+      var len = $(this).val().length;
+
+      if (len > 0) {
+        button.removeClass('hidden');
+      } else {
+        button.addClass('hidden');
+      }
+
+      if (e.which != 13) {
+        $('#min-chars').addClass('hidden');
+      }
+    });
+
+    search.keypress(function (e) {
+      if (e.which == 10 || e.which == 13) {
+        var searchFor = $('#search-for');
+        var noResult = $('#no-result');
+        var clearResult = $('.clear-result');
+
+        searchFor.addClass('hidden');
+        noResult.addClass('hidden');
+        clearResult.removeClass('active-btn');
+        $('#search-block').find('.category-box:not(.bookmark)').remove();
+
+        // --------------
+
+        // Close active category
+//        var active = $('.active-category');
+//        if (!active.hasClass('hidden')) {
+//          active.trigger('click');
+//        }
+
+        // --------------
+
+        var categoryList = $('.category-list:not(.bookmarks-list)');
+        var searchStr = $(this).val().toLowerCase();
+        var len = searchStr.length;
+
+        // Min chars
+        var minChars = $('#min-chars');
+        if (len >= 1 && len < 3) {
+          minChars.removeClass('hidden');
+        } else {
+          minChars.addClass('hidden');
+        }
+
+        if (len > 2) {
+          $('.active-search').removeClass('hidden');
+          categoryList.addClass('hidden');
+          clearResult.addClass('active-btn');
+
+          // Search for categories
+          var categoryTitles = $('.category-title');
+          searchCategory(categoryTitles, searchStr);
+
+          // Search for items
+          var items = $('.category').find('.category-box:not(.bookmark)');
+          searchItem(items, searchStr);
+
+          // No results
+          var categoryBox = $(".homepage-categories-box");
+          var totalCnt = categoryBox.children('div:not(#no-result):not(#search-for)').length;
+          var hiddenCnt = categoryBox.children('.hidden:not(#no-result):not(#search-for)').length;
+
+          if (totalCnt == hiddenCnt) {
+            noResult.removeClass('hidden');
+            $('.no-pages-for').text(searchStr);
+            renderRandomCategories(categoryBox.find('.category .category-box:not(.bookmark)'));
+
+            $('#request-page-block').removeClass('hidden');
+            $('#request-done').addClass('hidden');
+          } else {
+            searchFor.removeClass('hidden').html('"<span class="bold">' + searchStr + '</span>" results');
+          }
+
+        } else {
+          clearSearchResults();
+        }
+      }
+    });
+
+    $('#clear-search').click(function() {
+      $('#search').val('');
+      $(this).addClass('hidden');
+    });
+
+    // Reset search
+    $('.active-search, .clear-result').click(function () {
+      $('#clear-search, .active-search').addClass('hidden');
+
+      clearSearchResults();
+      $('#search').val('');
+    });
+
+    function renderRandomCategories(items) {
+      var randomCategories = $('.random-categories');
+      randomCategories.empty();
+      randomCategories.removeClass('hidden');
+      var len = items.length;
+      var cnt = 0;
+
+     // Shuffle items
+      while (len > 0) {
+        var index = Math.floor(Math.random() * len);
+        len--;
+        var temp = items[len];
+        items[len] = items[index];
+        items[index] = temp;
+      }
+
+      // Clone random items
+      while (cnt < 3) {
+        $(items[cnt]).clone().appendTo(randomCategories);
+        cnt++;
+      }
+
+      // Show items
+      randomCategories.find('.category-box:not(.bookmark)').css({opacity: 1});
+    }
+
+    function clearSearchResults() {
+      var categoryList = $('.category-list:not(.bookmarks-list)');
+      var categories = $('.category');
+
+      $('#search-for').addClass('hidden');
+      $('#no-result').addClass('hidden');
+      $('#search-block').find('.category-box:not(.bookmark)').remove();
+//      $('#search').val('');
+
+      $('.category-title').addClass('hidden');
+      $('.active-search').addClass('hidden');
+
+      categories.addClass('hidden');
+      categories.find('.category-box:not(.bookmark)').css('opacity', 0);
+
+      if (categoryList.hasClass('hidden')) {
+        categoryList.removeClass('hidden');
+        var boxes = categoryList.find('.category-box:not(.bookmark)');
+        boxes.each(function (i) {
+          var time = (100 * i);
+          animateItem($(this), time);
+        });
+      }
+    }
+
+    // -----------------
+
+    // Submit page by enter button
+    $('#request-page-content').keypress(function (e) {
+      if (e.which == 10 || e.which == 13) {
+        $('#request-page').click();
+      }
+    });
+
+    // Request page
+    $('#request-page').click(function () {
+      var input = $('#request-page-content');
+      var val = input.val();
+
+      if (val.length > 2) {
+        $.ajax({
+          url: '/request_page',
+          type: 'POST',
+          dataType: 'json',
+          async: true,
+          data: {text: val},
+          success: function (result) {
+            if (result.success != undefined) {
+              $('#request-page-block').addClass('hidden');
+              $('#request-done').removeClass('hidden');
+            }
+          },
+          error: function (xhr, textStatus, errorThrown) {
+            console.log(xhr, textStatus, errorThrown);
+          }
+        });
+      } else {
+        input.parent().next('small').removeClass('hidden');
+      }
+    });
+
+    // -----------------
+
+    // Active category
+    if (sessionStorage.active != undefined && sessionStorage.active != '') {
+      $('.category-list:not(.bookmarks-list)').find('.name[data-category="' + sessionStorage.active + '"]').trigger('click');
+
+      // Clear storage
+      sessionStorage.setItem('active', '');
+    }
+
+    window.onscroll = function () {
+      var scroll = $('.scroll-top');
+      if (isVisible($('.cycle-slideshow'))) {
+        scroll.addClass('hidden');
+      } else {
+        scroll.removeClass('hidden');
+      }
+    };
+
+    function isVisible(elem) {
+      var w = $(window);
+      var docViewTop = w.scrollTop();
+      var docViewBottom = docViewTop + w.height();
+
+      var elemTop = elem.offset().top;
+      var elemBottom = elemTop + elem.height();
+
+      return (((elemTop >= docViewTop) && (elemTop <= docViewBottom))
+      || ((elemBottom >= docViewTop) && (elemBottom <= docViewBottom)));
+    }
+
+    function animateItem(item, time) {
+      item.css({
+        'top': '-300px',
+        'left': '-300px',
+        'opacity': '0'
+      }).delay(time).animate({
+        'opacity': '1',
+        'top': '0',
+        'left': '0'
+      }, 200);
+    }
+
+    function searchCategory(categories, searchStr) {
+      categories.each(function (k, v) {
+        var categoryTitle = $(v);
+
+        var name = categoryTitle.text().toLowerCase();
+
+        // Show results
+        var str = name.search(searchStr);
+        if (str != '-1') {
+          var categoryItems = categoryTitle.closest('.category').find('.category-box:not(.bookmark)');
+          categoryItems.each(function (i) {
+            var item = $(this);
+            if (item.is(':hidden')) {
+              animateItem(item, 100 * i);
+            }
+          });
+
+          categoryTitle.find('span').text(searchStr);
+          categoryTitle.removeClass('hidden');
+          categoryTitle.closest('.category').removeClass('hidden');
+        } else {
+          categoryTitle.closest('.category').addClass('hidden');
+        }
+      });
+    }
+
+    function searchItem(items, searchStr) {
+      var block = $('#search-block');
+      var found = 1;
+
+      items.each(function (k, v) {
+        var item = $(v);
+        var id = item.attr('data-page');
+        var name = item.find('.name').text().toLowerCase();
+        var desc = item.find('.item-desc').text().toLowerCase();
+        var tags = item.attr('data-tag');
+
+        if (name.search(searchStr) != '-1' || desc.search(searchStr) != '-1') {
+          block.removeClass('hidden');
+
+          var exists = block.find('.category-box[data-page="' + id + '"]:not(.bookmark)');
+
+          if (exists.length == 0 && item.is(':hidden')) {
+            var clone = item.clone().appendTo('#search-block');
+            animateItem(clone, 100 * found++);
+          }
+        } else if (tags) {
+          var parts = tags.split(',');
+
+          var len = parts.length;
+          for (var i = 0; i < len; i++) {
+            var tag = parts[i].toLowerCase();
+
+            if (tag.search(searchStr) != '-1') {
+              exists = block.find('.category-box[data-page="' + id + '"]:not(.bookmark)');
+              if (exists.length == 0 && item.is(':hidden')) {
+                clone = item.clone().appendTo('#search-block');
+                animateItem(clone, 100 * k);
+              }
+            }
+          }
+        }
+      });
+    }
+
+    body.on('hidden.bs.modal', '.modal:not(.modal-static)', function () {
+      $('.modal:not(.modal-static)').remove();
+    });
+
+    // Privacy Policy
+    $('.privacy i').click(function() {
+      $(this).closest('.privacy').remove();
+    });
+
+    if (localStorage.privacy == undefined) {
+      $('.privacy').removeClass('hidden');
+
+      localStorage.setItem('privacy', true);
+    }
+
+  });
+</script>

@@ -1,0 +1,1019 @@
+<!-- slider -->
+<% if @slider %>
+    <div class="cycle-slideshow homepage-slider desktop-slider"
+         data-cycle-fx="fadeout"
+         data-cycle-speed="<%= @slider.speed %>"
+         data-timeout="<%= @slider.duration %>"
+         data-cycle-overlay-template="<div class=cycle-title><span>{{title}}</span><p class=sub-header>{{sub_header}}</p></div><div class=image-source>{{source}}</div>">
+      <div class="cycle-overlay custom"></div>
+      <% @slider_images.each do |s| %>
+          <% title = (s.title != '') ? s.title : @slider.name %>
+          <img src="<%= s.img.banner.url %>" alt="<%= s.title %>" data-title="<%= title %>"
+               data-sub_header="<%= s.sub_header %>" data-source="<%= s.source %>">
+      <% end %>
+    </div>
+
+    <div class="cycle-slideshow homepage-slider tab-slider"
+         data-cycle-fx="fadeout"
+         data-cycle-speed="<%= @slider.speed %>"
+         data-timeout="<%= @slider.duration %>"
+         data-cycle-overlay-template="<div class=cycle-title><span>{{title}}</span><p class=sub-header>{{sub_header}}</p></div><div class=image-source>{{source}}</div>">
+      <div class="cycle-overlay custom"></div>
+      <% @slider_images.each do |s| %>
+          <% title = (s.title != '') ? s.title : @slider.name %>
+          <img src="<%= s.img.tab_banner.url %>" alt="<%= s.title %>" data-title="<%= title %>"
+               data-sub_header="<%= s.sub_header %>" data-source="<%= s.source %>">
+      <% end %>
+    </div>
+
+    <div class="cycle-slideshow homepage-slider mobile-slider"
+         data-cycle-fx="fadeout"
+         data-cycle-speed="<%= @slider.speed %>"
+         data-timeout="<%= @slider.duration %>"
+         data-cycle-overlay-template="<div class=cycle-title><span>{{title}}</span><p class=sub-header>{{sub_header}}</p></div><div class=image-source>{{source}}</div>">
+      <div class="cycle-overlay custom"></div>
+      <% @slider_images.each do |s| %>
+          <% title = (s.title != '') ? s.title : @slider.name %>
+          <img src="<%= s.img.mobile_banner.url %>" alt="<%= s.title %>" data-title="<%= title %>"
+               data-sub_header="<%= s.sub_header %>" data-source="<%= s.source %>">
+      <% end %>
+    </div>
+
+    <div class="print-page-image">
+      <% @slider_images.take(1).each do |s| %>
+          <% title = (s.title != '') ? s.title : @slider.name %>
+
+          <div class=cycle-title>
+            <span><%= title %></span>
+            <p class=sub-header><%= s.sub_header %></p>
+          </div>
+          <img src="<%= s.img.banner.url %>">
+      <% end %>
+    </div>
+<% end %>
+
+<div class="logo" data-no-turbolink>
+  <a href="/"><img class="desktop-logo" src="/assets/desk_logo_last.png" alt="Bela Info"></a>
+  <a href="/"><img class="mobile-logo" src="/assets/mobile_logo_last.png" alt="Bela Info"></a>
+  <div class="home-header hidden-xs">Info in one place</div>
+</div>
+
+<div class="toolbar">
+  <% if current_user %>
+      <a href="#" data-toggle="modal" data-target="#bookmark" style="background: #293437; padding-top: 14px; font-size: 11px;">SAVE</a>
+      <a href="#" class="share-this-page" style="background: #581845;" data-toggle="modal" data-target="#email-form"><i class="fa fa-envelope-o"></i></a>
+  <% else %>
+      <a href="#" data-toggle="modal" id="show-bookmarks-next" data-target="#registration" style="background: #293437; padding-top: 14px; font-size: 11px;">SAVE</a>
+      <a href="#" style="background: #581845;" data-toggle="modal" data-target="#registration"><i class="fa fa-envelope-o"></i></a>
+  <% end %>
+
+  <a href="javascript:window.print()" style="background: #c70039;"><i class="fa fa-print"></i></a>
+  <!--<a href="#" style="background: #900c3f; padding-top: 15px" data-alt-text="Download PDF" data-prim-text="PDF" id="pdf">PDF</a>-->
+
+  <a href="#" style="background: #ec7804; font-size: 10px; padding-top: 14px; padding-left: 0;" data-toggle="modal" data-target="#all-columns" id="see-all">FILTER</a>
+
+  <a href="#" style="background: #ffc300; padding-top: 8px;" id="switch-image">
+    <span class="switch-text" style="font-size: 11px; display: block; line-height: 1.4em;">TEXT ONLY</span>
+    <span class="switch-image hidden" style="font-size: 9px; display: block; line-height: 1.5em; padding-top: 3px;">IMAGES ONLY</span>
+  </a>
+
+  <!--<a href="#" style="background: #f4bd00;"><i class="fa fa-floppy-o"></i></a>-->
+
+  <a href="#" data-toggle="modal" data-target="#share" style="background: #177c0c; padding-top: 6px;">
+    <img style="width: 35px;" src="/assets/share_last.png" alt="">
+  </a>
+
+  <a href="/" style="background: #000; padding: 4px 5px 0 0;"><img style="width: 40px;" src="/assets/home.png" alt=""></a>
+</div>
+
+<div class="mobile-toolbar">
+  <ul class="list-unstyled">
+    <% if current_user %>
+        <li><a href="#" data-toggle="modal" data-target="#bookmark" style="font-size: 13px; padding-top: 11px;">SAVE</a></li>
+        <li>
+          <a href="#" class="share-this-page" data-toggle="modal" data-target="#email-form" style="padding-top: 7px;"><i class="fa fa-envelope-o"></i></a>
+        </li>
+    <% else %>
+        <li><a href="#" data-toggle="modal" data-target="#registration" style="font-size: 13px; padding-top: 11px;">SAVE</a></li>
+        <li>
+          <a href="#" data-toggle="modal" data-target="#registration" style="padding-top: 7px;"><i class="fa fa-envelope-o"></i></a>
+        </li>
+    <% end %>
+
+    <li>
+      <a href="#" style="font-size: 13px; padding-top: 12px;" data-toggle="modal" data-target="#all-columns" id="see-all">FILTER</a>
+    </li>
+
+    <li>
+      <a href="#" style="padding-top: 4px;" id="switch-image">
+        <span class="switch-text" style="font-size: 13px; display: block;">TEXT ONLY</span>
+        <span class="switch-image hidden" style="font-size: 11px; display: block; line-height: 1.5em; padding-top: 2px;">IMAGES ONLY</span>
+      </a>
+    </li>
+
+    <li>
+      <a href="#" data-toggle="modal" data-target="#share" style="padding-top: 3px;"><img style="width: 35px;" src="/assets/share_last.png" alt=""></a>
+    </li>
+
+    <li><a href="/" style="padding-top: 2px"><img style="width: 40px;" src="/assets/home.png" alt=""></a></li>
+  </ul>
+</div>
+
+<div class="col-xs-12 text-center column-dots">
+  <ul class="list-inline">
+    <li><i class="fa fa-circle fs-14"></i></li>
+  </ul>
+</div>
+
+<!-- categories -->
+<div class="col-xs-12 categories" id="categories">
+  <div class="container page-columns-wrapper">
+    <div class="page-columns">
+
+      <% @columns.each do |c| %>
+          <div class="column-header page-column text-center fs-16 bold" data-column="<%= c.id %>">
+            <span><%= c.name %></span></div>
+      <% end %>
+
+      <% if @twitter_feed %>
+          <!-- Twitter feed -->
+          <div class="twitter-feed twitter-feed-title"><%= @twitter_feed.title %></div>
+      <% end %>
+    </div>
+  </div>
+
+  <input type="hidden" id="page-title" value="<%= @title %>">
+  <input type="hidden" id="page_id" value="<%= @page_id %>">
+  <input type="hidden" id="current-page" value="1">
+  <div class="prev-cols hidden"></div>
+  <div class="next-cols hidden"></div>
+</div>
+
+<div class="container mb-20 page-columns-wrapper">
+  <div class="page-columns" id="page-columns">
+
+    <% @columns.each do |c| %>
+        <div class="page-column" data-column="<%= c.id %>">
+          <% if @items[c.id].present? %>
+              <% @items[c.id].each do |k, v| %>
+                  <%
+                    if v.link.present? && v.link.length > 0
+                      http_link = v.link
+                    else
+                      http_link = ''
+                    end
+                  %>
+                  <div class="item" data-href="<%= http_link %>" data-item="<%= v.id %>">
+                    <% if v.img.thumb.url %>
+                        <div class="img-wrapper">
+                          <img src="<%= v.img.thumb.url %>" data-original="<%= v.img.url %>" itemprop="image">
+                        </div>
+                    <% end %>
+
+                    <% if (v.title.present? && v.title.length > 0) || (v.description.present? && v.description.length > 0) %>
+                    <div class="item-desc">
+                      <div class="title"><%= v.title %></div>
+                      <div class="desc"><%= v.description.html_safe %></div>
+                    </div>
+                    <% end %>
+
+                    <div class="clearfix"></div>
+                  </div>
+              <% end %>
+          <% end %>
+        </div>
+    <% end %>
+
+    <% if @twitter_feed %>
+        <!-- Twitter feed -->
+        <div class="twitter-feed">
+          <a class="twitter-timeline" href="https://twitter.com/hashtag/<%= @twitter_feed.hashtag %>" data-chrome="noscrollbar"
+             data-widget-id="<%= @twitter_feed.widget %>"><%= @twitter_feed.title %></a>
+
+          <!--<a class="twitter-timeline" href="https://twitter.com/hashtag/eurovelo13" data-chrome="noscrollbar"-->
+          <!--data-widget-id="720695864965120001">#eurovelo13 Tweets</a>-->
+
+          <script>!function (d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0], p = /^http:/.test(d.location) ? 'http' : 'https';
+            if (!d.getElementById(id)) {
+              js = d.createElement(s);
+              js.id = id;
+              js.src = p + "://platform.twitter.com/widgets.js";
+              fjs.parentNode.insertBefore(js, fjs);
+            }
+          }(document, "script", "twitter-wjs");</script>
+        </div>
+    <% end %>
+  </div><!-- /page-columns -->
+
+  <div id="insert-to-first" class="hidden">
+
+    <% if @links.length > 0 %>
+        <div class="item no-popup text-center" data-no-turbolink>
+          <div class="item-desc">
+            <% @links.each do |l| %>
+                <%
+                  if l.link.length > 0
+                    http_link = l.link.include?('http') ? l.link : 'http://' + l.link
+                  else
+                    http_link = ''
+                  end
+                %>
+                <p class="mt-15">
+                  <a target="_blank" href="<%= http_link %>" class="title quick-link"><span><%= l.text %></span></a>
+                </p>
+            <% end %>
+
+          </div>
+          <div class="clearfix"></div>
+        </div>
+    <% end %>
+
+    <!-- Add & Report content -->
+    <div class="button-wide mt-20 mb-20">
+      <button class="btn btn-sm btn-success" id="add-content"><b>Add content</b></button>
+      <div class="add-content hidden">
+        <button class="btn btn-sm btn-success" id="add-column">Add column</button>
+        <button class="btn btn-sm btn-success mt-10" id="add-item">Add item to column</button>
+      </div>
+
+      <button class="btn btn-sm btn-danger mt-10" id="report-content"><b>Report content</b></button>
+
+      <!-- Comments -->
+      <div class="comment-header fs-12 bold mt-20">Comments <i class="fa fa-arrow-down"></i></div>
+
+      <div class="comments">
+        <% @comments.take(2).each do |comment| %>
+            <%= render :partial => 'comment/comment', :object => comment %>
+        <% end %>
+
+        <% if @comments.length > 2 %>
+            <div class="show-hide">show more (<%= @comments.drop(2).length %>)</div>
+            <div class="hidden">
+              <% @comments.drop(2).each do |comment| %>
+                  <%= render :partial => 'comment/comment', :object => comment %>
+              <% end %>
+            </div>
+        <% end %>
+      </div>
+
+      <input type="text" name="name" class="form-control mt-10" placeholder="Your name">
+      <textarea rows="3" name="message" class="form-control mt-10" placeholder="Comment here"></textarea>
+      <button id="send-message" class="secondary-button mt-10">Add</button>
+
+    </div><!-- /Report content -->
+
+  </div><!-- /insert-to-first -->
+</div><!-- /page-columns-wrapper -->
+
+<div class="container similar-pages text-center">
+  <ul class="list-inline">
+    <% @similar_pages.each do |p| %>
+        <li><a href="/<%= p.slug ? p.slug : p.id %>"><%= p.title %></a></li>
+    <% end %>
+  </ul>
+</div>
+
+<!-- Modal window "All columns filter" -->
+<div id="all-columns" class="modal modal-static" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog" style="width: 250px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <b>Filter columns</b>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      </div>
+      <div class="modal-body">
+
+        <label><input class="select-all-columns" type="checkbox" checked> Select all</label>
+        <br><br>
+
+        <ul class="list-unstyled">
+          <% @columns.drop(1).each do |c| %>
+              <li><label><input type="checkbox" value="<%= c.id %>" checked> <%= c.name %></label></li>
+          <% end %>
+        </ul>
+
+        <div class="row">
+          <div class="modal-footer">
+            <div class="pull-right">
+              <button class="primary-button" id="filter-columns">Filter</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="privacy hidden">
+  <div class="pull-right pointer"><i class="fa fa-times"></i></div>
+  <p class="mt-10 mb-15">We use cookies</p>
+  <p>Please see our Privacy Policy</p>
+</div>
+
+<!-- Item description template -->
+<script id="item-desc-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'item/item_desc' %>
+</script>
+
+<!-- Item-form template -->
+<script id="item-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'item/item_form' %>
+</script>
+
+<!-- Column-form template -->
+<script id="column-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'column/column_form' %>
+</script>
+
+<!-- Report-form template -->
+<script id="report-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'individual_page/report_form' %>
+</script>
+
+<!-- Alert-form template -->
+<script id="alert-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'individual_page/alert_form' %>
+</script>
+
+<!-- Article template -->
+<script id="article-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'article/article' %>
+</script>
+
+<!-- PDF form template -->
+<script id="pdf-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'individual_page/pdf_form' %>
+</script>
+
+<!-- Modal window "Share with socials" -->
+<%= render 'individual_page/share' %>
+
+<script>
+  $(document).ready(function () {
+    var thx_msg = 'Admin will now approve, your suggestion will shortly appear';
+    var rep_msg = 'Your report will be considered by the administrator';
+
+    var body = $('body');
+    var pageColumns = $('#page-columns');
+    var columns = $('.page-columns');
+
+    $('footer, .push').addClass('add-height');
+
+    // ------ Toolbar ------
+
+    // Show/hide images
+    body.delegate('#switch-image', 'click', function (e) {
+      e.preventDefault();
+
+      var images = $('.img-wrapper');
+      if (images.is(':hidden')) { // Show images
+        $('.switch-text, .switch-image').toggleClass('hidden');
+
+        images.slideDown(300);
+      } else { // Show text
+        $('.switch-text, .switch-image').toggleClass('hidden');
+
+        images.slideUp(300);
+      }
+    });
+
+    // See all columns
+//    $('#see-all').click(function (e) {
+//      e.preventDefault();
+//      $('#all-columns').modal('show');
+//    });
+
+    // Filter columns
+    $('#filter-columns').click(function (e) {
+      e.preventDefault();
+
+      var form = $('#all-columns');
+      var columns = form.find('input[type="checkbox"]');
+
+      columns.each(function (k, v) {
+        var input = $(v);
+        var id = input.val();
+        var column = $('.page-column[data-column="' + id + '"]');
+
+        if (input.is(':checked')) {
+          column.removeClass('hidden');
+        } else {
+          column.addClass('hidden');
+        }
+      });
+
+      form.modal('hide');
+    });
+
+    $('.select-all-columns').click(function () {
+      var inputs = $('#all-columns').find('input[type="checkbox"]:not(.select-all-columns)');
+      if ($(this).is(':checked')) {
+        inputs.prop('checked', true);
+      } else {
+        inputs.prop('checked', false);
+      }
+    });
+
+    // Show PDF form
+    $('#pdf').click(function (e) {
+      e.preventDefault();
+
+      var params = {
+        'title': $('#page-title').val(),
+        'page_id': $('#page_id').val()
+      };
+
+      $('#pdf-form-template').tmpl(params).appendTo('body');
+      $('#show-pdf-form').modal('show');
+    });
+
+    body.delegate('#download-pdf', 'click', function () {
+
+    });
+
+    // ---------------------
+
+    // Show columns
+    pageColumns.find('.page-column').animate({'top': 0}, 1000);
+
+    // Show toolbar
+    var toolbar = $('.toolbar');
+    var banner = $('.cycle-slideshow');
+    var delay = 300;
+
+    // toolbar.animate({left: '0'}, delay).addClass('toolbar-hidden');
+
+    if ($(document).height() > $(window).height() + banner.height()) {
+      window.onscroll = function () {
+        var categories = $('#categories');
+        var pageColumns = $('#page-columns');
+
+        // Changing the position of the column headings
+        if (isVisible(banner, 1, 9)) {
+          categories.css({position: 'relative', top: 'auto'});
+          pageColumns.css({'margin-top': '0'});
+        } else {
+          categories.css({position: 'fixed', top: '-6px'});
+          pageColumns.css({'margin-top': '81px'});
+        }
+
+        // Show/Hide toolbar
+        if (isVisible(banner, 2)) {
+          if (toolbar.hasClass('toolbar-hidden')) {
+            toolbar.animate({left: '-60px'}, delay).removeClass('toolbar-hidden');
+          }
+
+        } else {
+          if (!toolbar.hasClass('toolbar-hidden')) {
+            toolbar.animate({left: '0'}, delay).addClass('toolbar-hidden');
+          }
+        }
+      };
+    } else {
+      toolbar.animate({left: '0'}, delay).addClass('toolbar-hidden');
+    }
+
+    $('.show-hide').click(function () {
+      $(this).next('div').toggleClass('hidden');
+    });
+
+    // Insert message/report/suggest block to first column
+    var insert = $('#insert-to-first');
+    var firstCol = pageColumns.find('div:first');
+    if (firstCol.length) {
+      firstCol.append(insert);
+    } else {
+      pageColumns.append('<div class="page-column"></div>');
+      pageColumns.find('.page-column').append(insert);
+    }
+    insert.removeClass('hidden');
+
+    // Send message
+    body.delegate('#send-message', 'click', function () {
+      clearFormErrors(insert);
+      var name = insert.find('[name="name"]');
+      var message = insert.find('[name="message"]');
+
+      if (!checkForEmptyField(name)) return false;
+      if (!checkForEmptyField(message)) return false;
+      if (!checkForFieldLength(message, 255)) return false;
+      var page_id = +$('#page_id').val();
+      var data = 'page_id=' + page_id + '&name=' + name.val() + '&message=' + message.val();
+
+      $.ajax({
+        url: '/page/send_message',
+        type: 'POST',
+        dataType: 'html',
+        async: true,
+        data: data,
+        success: function (result) {
+          if (result) {
+            var params = {
+              formTitle: 'Comment',
+              formText: 'Admin will now approve, your comment will shortly appear'
+            };
+
+            $('#alert-form-template').tmpl(params).appendTo('body');
+            $('#alert-form').modal('show');
+          }
+          // $('.comments').append(result);
+
+          // Clear old message
+          message.val('');
+        },
+        error: function (xhr, textStatus, errorThrown) {
+//          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+    });
+
+    // Redirect to external link
+    body.delegate('.item:not(.report-content):not(.no-popup)', 'click', function () {
+      var item = $(this);
+      var href = item.attr("data-href");
+
+      if (href) {
+        try { // Try to parse links
+          var links = JSON.parse(href);
+
+        } catch (exception) { // Link is not encrypted
+          links = [{link: href}]
+        }
+
+        if (links.length == 1) {
+          var link = links[0].link;
+          if (link.search('http') == '-1') {
+            link = 'http://' + link;
+          }
+
+          window.open(link);
+        } else {
+          if (!item.find('.item-links-block').length) {
+            var html = '<div class="item-links-block">';
+            $.each(links, function (k, link) {
+              var httpLink = link.link;
+              if (httpLink.search('http') == '-1') {
+                httpLink = 'http://' + httpLink;
+              }
+
+              html += '<a href="' + httpLink + '" target="_blank">' + link.title + '</a>';
+            });
+            html += '</div>';
+
+            item.append(html);
+          }
+        }
+
+      } else { // Show modal window with content
+        var params = {
+          title: item.find('.title').text(),
+          description: item.find('.desc').html(),
+          img: item.find('img').attr('data-original')
+        };
+
+        $('#item-desc-template').tmpl(params).appendTo('body');
+        $('#item-desc').modal('show');
+      }
+    });
+
+    // Show Add-content
+    body.delegate('#add-content', 'click', function () {
+      $(this).next('.add-content').toggleClass('hidden');
+    });
+
+    // ---------------
+
+    // Show Add-column-Form
+    body.delegate('#add-column', 'click', function () {
+      var params = {
+        formTitle: 'Add new column',
+        page_id: $('#page_id').val(),
+        column_id: '',
+        name: ''
+      };
+
+      $('#column-form-template').tmpl(params).appendTo('body');
+      $('#add-column-form').modal('show');
+    });
+
+    // Save column
+    body.delegate('#save-column', 'click', function () {
+      var categories = $('.categories');
+      var form = $('#column-form');
+      clearFormErrors(form);
+      if (!checkForEmptyField(form.find('[name="name"]'))) return false;
+
+      $.ajax({
+        url: '/page/suggest_column',
+        type: 'POST',
+        dataType: 'json',
+        async: true,
+        data: form.serialize(),
+        success: function (response) {
+          if (response.new_column != undefined) {
+            var column = response.new_column;
+
+            // Add new column
+            categories.find('.page-columns').append(
+                '<div class="column-header page-column text-center fs-18 bold new-column" ' +
+                'data-column="' + column.id + '"><span>' + column.name + '</span></div>'
+            );
+            $('#page-columns').append(
+                '<div class="page-column" data-column="' + column.id + '"></div>'
+            );
+
+            // Find & show new column
+            var cnt = categories.find('.page-column').length;
+            if (cnt > 2) {
+              var next = $('.next-cols');
+              next.removeClass('hidden');
+
+              var page = Math.ceil(cnt / 2);
+              // var page = Math.ceil(cnt / 7);
+              var width = page * 1171;
+
+              $('.page-columns').css('width', width);
+
+              var current = $('#current-page').val();
+              for (; current < page; current++) {
+                next.trigger('click');
+              }
+            }
+
+//            $('body').scrollTo(categories, 400);
+            $('html, body').animate({
+              scrollTop: categories.offset().top
+            }, 300);
+            setTimeout(function () {
+              var params = {
+                formTitle: 'Add column',
+                formText: 'Admin will now approve, your column will shortly appear'
+              };
+              $('#alert-form-template').tmpl(params).appendTo('body');
+              $('#alert-form').modal('show');
+            }, 500);
+          }
+        },
+        error: function (xhr, textStatus, errorThrown) {
+//          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+
+      $('#add-column-form').modal('hide');
+      $('.modal').remove();
+    });
+
+    // ---------------
+
+    // Add Item
+    body.delegate('#add-item', 'click', function () {
+      $(this).toggleClass('active-button');
+      var categories = $('.categories');
+      categories.find('.page-column').toggleClass('add-to-column');
+
+//      $('body').scrollTo(categories, 200);
+    });
+
+    // Show Add-Item-Form
+    body.delegate('.add-to-column', 'click', function () {
+      var column = $(this);
+      var column_id = column.attr('data-column');
+      var name = column.find('span').text();
+      var page_id = $('#page_id').val();
+
+      if (!column_id && page_id) return false;
+      var params = {
+        formTitle: 'Add new item to "' + name + '"',
+        column_id: column_id,
+        page_id: page_id
+      };
+
+      $('#item-form-template').tmpl(params).appendTo('body');
+      $('#add-item-form').modal('show');
+    });
+
+    // Save Item
+    body.delegate('#save-item', 'click', function () {
+      var form = $('#item-form');
+      clearFormErrors(form);
+      if (!checkForEmptyField(form.find('[name="title"]'))) return false;
+
+      var column_id = +form.find('[name="column_id"]').val();
+      var itemForm = document.querySelector('form');
+      var form_data = new FormData(itemForm);
+
+      $.ajax({
+        url: '/page/suggest_item',
+        type: 'POST',
+        cache: false,
+        contentType: false,
+        processData: false,
+        data: form_data,
+        success: function (result) {
+          if (result.item != undefined && result.new_item != undefined) {
+            var columns = $('#page-columns');
+            var column = columns.find('div[data-column="' + result.item.column_id + '"]');
+
+            appendItemToColumn(result.new_item, column);
+
+            var item = columns.find('div[data-item="' + result.new_item.id + '"]');
+//            $('body').scrollTo(item, 400);
+            $('html, body').animate({
+              scrollTop: item.offset().top
+            }, 300);
+
+            $('.categories').find('.add-to-column').removeClass('add-to-column');
+
+            setTimeout(function () {
+              var params = {
+                formTitle: 'Add content',
+                formText: 'Admin will now approve, your comment will shortly appear'
+              };
+              $('#alert-form-template').tmpl(params).appendTo('body');
+              $('#alert-form').modal('show');
+            }, 500);
+          }
+        },
+        error: function (xhr, textStatus, errorThrown) {
+//          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+
+      $('#add-item-form').modal('hide');
+      $('.modal').remove();
+      $('#add-item').removeClass('active-button');
+    });
+
+    function appendItemToColumn(item, column) {
+      var html = '';
+      html += '<div class="item new-item" data-href="' + item.link + '" data-item="' + item.id + '">';
+      if (item.img.thumb.url) {
+        html += '<div class="img-wrapper">';
+        html += '<img src="' + item.img.thumb.url + '" data-original="' + item.img.url + '">';
+        html += '</div>'
+      }
+      html += '<div class="item-desc">';
+      html += '<div class="title">' + item.title + '</div>';
+      html += '<div class="desc">' + item.description + '</div>';
+      html += '</div><div class="clearfix"></div></div>';
+
+      column.append(html);
+    }
+
+    // ---------------
+
+    // Allow to report content
+    body.delegate('#report-content', 'click', function () {
+      $(this).toggleClass('active-button');
+      $('.categories').find('.page-column').toggleClass('report-content');
+      $('#page-columns').find('.item').toggleClass('report-content');
+    });
+
+    // Show report form
+    body.delegate('.report-content', 'click', function (e) {
+      e.preventDefault();
+      var content = $(this);
+      var column = +content.attr('data-column');
+      var item = +content.attr('data-item');
+      if (column) {
+        var type = 'column';
+        var name = content.find('span').text();
+        item = '';
+      } else {
+        type = 'item';
+        name = content.find('.title').text();
+        column = '';
+      }
+
+      var params = {
+        formTitle: 'Report ' + type + ' "' + name + '"',
+        page_id: $('#page_id').val(),
+        item_id: item,
+        column_id: column,
+        type: type
+      };
+
+      $('#report-form-template').tmpl(params).appendTo('body');
+      $('#show-report-form').modal('show');
+    });
+
+    // Report content
+    body.delegate('#report', 'click', function () {
+      var form = $('#report-form');
+      clearFormErrors(form);
+      if (!checkForEmptyField(form.find('[name="name"]'))) return false;
+      if (!checkForEmptyField(form.find('[name="reason"]'))) return false;
+
+      var column_id = +form.find('[name="column_id"]').val();
+      var item_id = +form.find('[name="item_id"]').val();
+      var type = form.find('[name="type"]').val();
+
+      $.ajax({
+        url: '/page/report_content',
+        type: 'POST',
+        dataType: 'json',
+        async: true,
+        data: form.serialize(),
+        success: function (result) {
+          if (type == 'item') {
+            $('#page-columns').find('div[data-item="' + item_id + '"]').addClass('reported');
+          } else {
+            $('.categories').find('div[data-column="' + column_id + '"]').addClass('reported');
+          }
+
+          setTimeout(function () {
+            var params = {
+              formTitle: 'Report',
+              formText: 'Your report will be considered by the administrator'
+            };
+            $('#alert-form-template').tmpl(params).appendTo('body');
+            $('#alert-form').modal('show');
+          }, 500);
+        },
+        error: function (xhr, textStatus, errorThrown) {
+//          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+
+      $('#show-report-form').modal('hide');
+      $('.modal').remove();
+      $('#report-content').removeClass('active-button');
+      $('.page-columns-wrapper').find('.report-content').removeClass('report-content');
+    });
+
+    // ---------------
+
+    // Show article
+    $(document).delegate('.article-trigger', 'click', function () {
+      $.ajax({
+        url: '/get_article',
+        type: 'GET',
+        dataType: 'json',
+        async: true,
+        data: {article_id: $(this).attr('data-article_id')},
+        success: function (result) {
+          if (result) {
+            var params = {
+              header: result.header,
+              text: result.text
+            };
+
+            $('#article-template').tmpl(params).appendTo('body');
+            $('#article').modal('show');
+          }
+        }
+      });
+    });
+
+    // ---------------
+
+    // Add user bookmark
+    $('#add-bookmark').click(function () {
+      var button = $(this);
+      var modal = button.parents('.modal');
+      var bookmarks = modal.find('.category-list');
+
+      $.post("/page/add_bookmark", {'page_id': $('#page_id').val()}, function (response) {
+        if (response.length) {
+          if (!bookmarks.find('.category-box').length) {
+            bookmarks.empty(); // Remove "No bookmarks yet" message
+          }
+
+          bookmarks.append(response);
+        }
+
+        button.remove();
+      });
+    });
+
+    $('#show-bookmarks-next').click(function () {
+      $('#sign_in_user').find('input[name="commit"]').attr('show-bookmarks-next', 1);
+    });
+    $('input[name="commit"]').click(function () {
+      var showBookmarks = $(this).attr('show-bookmarks-next');
+
+      if (showBookmarks) {
+        sessionStorage.setItem('show_bookmarks', true);
+      }
+    });
+
+    // ---------------
+
+    $('.share-this-page').click(function() {
+      $('#share-bookmark-by-email').addClass('hidden');
+      $('#share-by-email').removeClass('hidden');
+    });
+
+    // Share this page by email
+    $('#share-by-email').click(function () {
+      var button = $(this);
+      var modal = button.parents('.modal');
+      var email = modal.find('input[name="email_share"]');
+      var emailVal = email.val();
+
+      if (/\S+@\S+\.\S+/.test(emailVal)) {
+        button.attr('disable', true);
+
+        $.post("/page/share_by_email", {
+          page_id: $('#page_id').val(),
+          description: findPageDescription(),
+          email: emailVal
+        }, function (response) {
+          if (response.error != undefined) {
+            modal.find('.response-message').text(response.success);
+          } else if (response.success != undefined) {
+            modal.find('.has-error').removeClass('has-error');
+            modal.find('.response-message').text(response.success);
+          }
+
+          button.attr('disable', false);
+        });
+      } else {
+        console.log('error');
+        email.addClass('has-error');
+      }
+    });
+
+    function findPageDescription() {
+      var items = $('#page-columns').find('.title');
+      var result = '';
+
+      items.each(function (k, v) {
+        var item = $(v);
+        var title = item.text().toLowerCase();
+
+        if (result == '' && title.search('description') != '-1') {
+          result = item.next('.desc').text();
+        }
+      });
+
+      return result;
+    }
+
+    function findPageImage() {
+      return $('.print-page-image').find('img').attr('src');
+    }
+
+    // ---------------
+
+    function clearFormErrors(form) {
+      form.find('.has-error').removeClass('has-error');
+    }
+
+    function checkForEmptyField(input) {
+      var len = input.val().length;
+      if (len <= 0) {
+        input.addClass('has-error');
+        return false;
+      }
+      return true;
+    }
+
+    function checkForFieldLength(input, length) {
+      var len = input.val().length;
+      if (len > length) {
+        input.addClass('has-error');
+        return false;
+      }
+      return true;
+    }
+
+    function isVisible(elem, height, offset) {
+      offset = (offset != undefined) ? offset : 0;
+
+      var w = $(window);
+      var docViewTop = w.scrollTop();
+      var docViewBottom = docViewTop + w.height();
+
+      var elemTop = elem.offset().top + offset;
+      var elemBottom = elemTop + elem.height() / height;
+
+      return (((elemTop >= docViewTop) && (elemTop <= docViewBottom))
+      || ((elemBottom >= docViewTop) && (elemBottom <= docViewBottom)));
+    }
+
+    body.on('hidden.bs.modal', '.modal:not(.modal-static)', function () {
+      $('.modal:not(.modal-static)').remove();
+    });
+
+    // Privacy Policy
+    $('.privacy i').click(function () {
+      $(this).closest('.privacy').remove();
+    });
+
+    if (localStorage.privacy == undefined) {
+      $('.privacy').removeClass('hidden');
+
+      localStorage.setItem('privacy', true);
+    }
+
+    if (sessionStorage.show_bookmarks != undefined && sessionStorage.show_bookmarks != '') {
+      $('.bookmarks').trigger('click');
+
+      // Clear storage
+      sessionStorage.setItem('show_bookmarks', '');
+    }
+
+  });
+</script>

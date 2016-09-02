@@ -1,0 +1,47 @@
+<div id="add-category-form" class="modal" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <b>${formTitle}</b>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form enctype="multipart/form-data" id="category-form" class="mb-20">
+          <input type="hidden" name="category_id" value="${category_id}">
+
+          <div class="form-group">
+            <label for="name">Category name</label>
+            <input type="text" name="name" class="form-control" id="name" value="${name}">
+          </div>
+
+          {{if img}}
+          <div class="preview">
+            <img src="${img}" alt="${title}" class="img-thumbnail">
+          </div>
+          {{/if}}
+
+          <div class="form-group">
+            <label for="img">Image: ${originalImg}</label>
+            <input type="file" name="img" id="img" value="">
+          </div>
+        </form>
+
+        <div class="row">
+          <div class="modal-footer">
+            <div class="pull-left">
+              <button class="secondary-button" data-dismiss="modal">Cancel</button>
+            </div>
+
+            <div class="pull-right">
+              {{if category_id}}
+              <button class="btn btn-sm btn-danger" id="delete-category">Delete category</button>
+              {{/if}}
+              <button class="primary-button" id="save-category">Save</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

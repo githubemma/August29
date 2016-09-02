@@ -1,0 +1,68 @@
+<% content_for :header do %>
+    <%= javascript_include_tag 'admin' %>
+<% end %>
+
+<div class="container admin small-padding">
+
+  <div class="row admin-wrapper">
+    <!-- left column -->
+    <div class="left-column">
+      <%= render :partial => 'admin/menu' %>
+    </div>
+
+    <!-- content -->
+    <div class="admin-content">
+      <div class="row">
+
+        <div class="col-xs-6">
+          <ul class="list-unstyled active-list" id="user-list">
+            <% @users.each do |u| %>
+                <li data-user="<%= u.id %>"><%= u.email %> [<%= u.created_at %>]</li>
+            <% end %>
+          </ul>
+        </div>
+
+        <div class="col-xs-6">
+          <ul class="list-unstyled" id="bookmarks">
+
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<script>
+$(function() {
+  var body = $('body');
+
+  // Get user bookmarks
+  body.delegate('#user-list li', 'click', function () {
+
+    $.ajax({
+      url: '/admin/user/get_user_bookmarks',
+      type: 'GET',
+      dataType: 'json',
+      async: true,
+      data: {user_id: $(this).attr('data-user')},
+      success: function (response) {
+        console.log(response);
+
+        var html = '';
+        $.each(response.bookmarks, function(k, v) {
+          html += '<li>' + v.title + '</li>';
+        });
+
+        $('#bookmarks').html(html);
+      },
+      error: function (xhr, textStatus, errorThrown) {
+        console.log(xhr, textStatus, errorThrown);
+      }
+    });
+  });
+
+});
+</script>

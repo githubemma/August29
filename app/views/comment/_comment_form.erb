@@ -1,0 +1,40 @@
+<div id="edit-comment-form" class="modal" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <b>${formTitle}</b>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form action="" id="comment-form" class="mb-20">
+          <input type="hidden" name="comment_id" value="${comment_id}">
+
+          <div class="form-group">
+            <label for="name">Sender name</label>
+            <input type="text" name="name" class="form-control" id="name" value="${name}">
+          </div>
+
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea rows="2" name="message" class="form-control" id="message">${message}</textarea>
+          </div>
+
+        </form>
+
+        <div class="row">
+          <div class="modal-footer">
+            <div class="pull-left">
+              <button class="secondary-button" data-dismiss="modal">Cancel</button>
+            </div>
+
+            <div class="pull-right">
+              <button class="btn btn-sm btn-danger" id="delete-comment">Delete comment</button>
+              <button class="primary-button" id="edit-comment">Save</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

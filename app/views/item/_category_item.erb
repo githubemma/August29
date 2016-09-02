@@ -1,0 +1,18 @@
+<div class="text-center category-box" style="opacity: 0;" data-no-turbolink
+     data-page="<%= page.id %>" data-tag="<%= page.tag %>">
+  <% image = page.img.slide.url ? page.img.slide.url : 'assets/no_image.jpg' %>
+  <% slug = page.slug ? page.slug : page.id %>
+
+    <a href="<%= slug %>" data-category="<%= category_id %>">
+      <div class="img-wrapper">
+       <img src="<%= image %>" alt="" class="img-responsive" itemprop="image">
+      </div>
+    </a>
+
+  <a href="<%= slug %>" class="name"
+     data-category="<%= category_id %>"><%= page.title %></a>
+
+  <div class="project-info text-left">
+    <p class="item-desc"><%= page.description.html_safe %></p>
+  </div>
+</div>

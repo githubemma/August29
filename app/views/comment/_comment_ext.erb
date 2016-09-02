@@ -1,0 +1,17 @@
+<div class="message" data-status="<%= comment.status %>" data-comment_id="<%= comment.id %>">
+  <div class="sender">
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="pull-left">sender: <b class="c-name"><%= comment.name %></b></div>
+        <div class="pull-right" data-no-turbolink>
+          page: <a href="/page/<%= comment.page_id %>"><%= comment.title %></a>
+          <button class="btn btn-default btn-sm edit-comment">Edit/Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="message-body">
+    <div class="fs-11 clr-grey"><%= comment.created_at.strftime('%Y-%m-%d %H:%M:%S') %></div>
+    <div class="c-message"><%= comment.message %></div>
+  </div>
+</div>

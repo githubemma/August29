@@ -1,0 +1,40 @@
+<div id="add-column-form" class="modal" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <b>${formTitle}</b>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form action="" id="column-form" class="mb-20">
+          <input type="hidden" name="column_id" value="${column_id}">
+          <input type="hidden" name="page_id" value="${page_id}">
+          <input type="hidden" name="type" value="${type}">
+          <input type="hidden" name="status" value="${status}">
+
+          <div class="form-group">
+            <label for="name">Column name</label>
+            <input type="text" name="name" class="form-control" id="name" value="${name}">
+          </div>
+
+        </form>
+
+        <div class="row">
+          <div class="modal-footer">
+            <div class="pull-left">
+              <button class="secondary-button" data-dismiss="modal">Cancel</button>
+            </div>
+
+            <div class="pull-right">
+              {{if column_id}}
+              <button class="btn btn-sm btn-danger" id="delete-column">Delete column</button>
+              {{/if}}
+              <button class="primary-button" id="save-column">Submit</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

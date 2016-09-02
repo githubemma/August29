@@ -1,0 +1,249 @@
+<% content_for :header do %>
+    <%= javascript_include_tag 'admin' %>
+<% end %>
+
+<div class="container admin small-padding">
+
+  <div class="row admin-wrapper">
+    <!-- left column -->
+    <div class="left-column">
+      <%= render :partial => 'admin/menu' %>
+    </div>
+
+    <!-- content -->
+    <div class="admin-content">
+      <div class="row">
+
+        <% if @request_pages.length > 0 %>
+
+        <h4>Page requests</h4>
+        <% @request_pages.each do |p| %>
+            <p class="page-request" data-request_id="<%= p.id %>" data-status="<%= p.status %>">
+              <% if p.status == 0 %><b class="clr-green">[NEW]</b>&nbsp;<% end %><b>[<%= p.created_at.strftime('%Y-%m-%d %H:%M') %>]</b>
+              <%= p.text %> <i class="fa fa-times fs-16 clr-red pointer remove-page-request"></i>
+            </p>
+        <% end %>
+
+        <% else %>
+        <h4>No page requests yet</h4>
+        <% end %>
+
+        <h4>Comments</h4>
+        <% @comments.each do |k, v| %>
+        <div class="day-comments"><span class="status"></span> [<span class="comment-date"><%= k %></span>]
+          <span>total comments: </span><%= v.length %> <span class="new-comment"></span>
+        </div>
+        <div class="day-comments-body hidden">
+          <% v.each do |id, comment| %>
+          <%= render :partial => 'comment/comment_ext', :locals => {comment: comment} %>
+          <% end %>
+        </div>
+        <% end %>
+
+      </div>
+    </div><!-- /admin-content -->
+
+  </div><!-- /admin-wrapper -->
+</div><!-- /admin -->
+
+<!-- Comment-form template -->
+<script id="comment-form-template" type="text/x-jquery-tmpl">
+  <%= render :partial => 'comment/comment_form' %>
+</script>
+
+<script>
+$(function() {
+  var body = $('body');
+
+  // Check new page requests
+  var pages = $('.page-request');
+  $.each(pages, function(i, v){
+    let request = $(v);
+    let status = request.attr('data-status');
+
+    if (status == 0) {
+      $.ajax({
+        url: '/admin/comment/change_request_page_status',
+        type: 'POST',
+        dataType: 'json',
+        async: true,
+        data: {id: request.attr('data-request_id')},
+        success: function (result) {
+          console.log(result);
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+    }
+  });
+
+  // Remove page request
+  body.delegate('.remove-page-request', 'click', function () {
+    let p = $(this).parent();
+
+    $.ajax({
+      url: '/admin/comment/delete_page_request',
+      type: 'POST',
+      dataType: 'json',
+      async: true,
+      data: {id: p.attr('data-request_id')},
+      success: function (result) {
+        console.log(result);
+
+        if (result.success != undefined) {
+          p.remove();
+        }
+      },
+      error: function (xhr, textStatus, errorThrown) {
+        console.log(xhr, textStatus, errorThrown);
+      }
+    });
+  });
+
+  // ----------------------
+
+  checkNewComments();
+
+  // Show comments by day
+  $('.day-comments').click(function(){
+    var comments = $(this);
+    comments.next('.day-comments-body').toggleClass('hidden');
+    var status = comments.find('.status');
+    var date = comments.find('.comment-date').text();
+
+    if (status.html().length > 0) {
+      $.ajax({
+        url: '/admin/comment/change_status',
+        type: 'POST',
+        dataType: 'html',
+        async: true,
+        data: 'date=' + date,
+        success: function (result) {
+          console.log(result);
+          comments.find('.status').empty();
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+    }
+  });
+
+  // Show Edit-Comment-Form
+  body.delegate('.edit-comment', 'click', function (e) {
+    e.preventDefault();
+    var comment = $(this).closest('.message');
+    var name = comment.find('.c-name').text();
+    var message = comment.find('.c-message').text();
+
+    var params = {
+      formTitle: 'Edit comment',
+      comment_id: comment.attr('data-comment_id'),
+      name: name,
+      message: message
+    };
+
+    $('#comment-form-template').tmpl(params).appendTo('body');
+    $('#edit-comment-form').modal('show');
+  });
+
+  // Save comment
+  body.delegate('#edit-comment', 'click', function () {
+    var form = $('#comment-form');
+    clearFormErrors(form);
+    if (!checkForEmptyField(form.find('[name="name"]'))) return false;
+    if (!checkForEmptyField(form.find('[name="message"]'))) return false;
+
+    $.ajax({
+      url: '/admin/comment/edit_comment',
+      type: 'POST',
+      dataType: 'json',
+      async: true,
+      data: form.serialize(),
+      success: function (response) {
+        console.log(response);
+        var c = response.comment;
+        var content = $('.admin-content');
+        var message = content.find('div[data-comment_id="' + c.id + '"]');
+        message.find('.c-name').text(c.name);
+        message.find('.c-message').text(c.message);
+      },
+      error: function (xhr, textStatus, errorThrown) {
+        console.log(xhr, textStatus, errorThrown);
+      }
+    });
+
+    $('#edit-comment-form').modal('hide');
+    $('.modal').remove();
+  });
+
+  // Delete comment
+  body.delegate('#delete-comment', 'click', function () {
+    var message = 'Are you sure you want to delete the comment?';
+
+    if (confirm(message)) {
+      $.ajax({
+        url: '/admin/comment/delete_comment',
+        type: 'POST',
+        dataType: 'json',
+        async: true,
+        data: $('#comment-form').serialize(),
+        success: function (response) {
+          console.log(response);
+          var content = $('.admin-content');
+
+          if (response.comment_id != undefined) {
+            content.find('div[data-comment_id="' + response.comment_id + '"]').remove();
+          }
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.log(xhr, textStatus, errorThrown);
+        }
+      });
+
+      $('#edit-comment-form').modal('hide');
+      $('.modal').remove();
+    }
+  });
+
+  function checkNewComments() {
+    var days = $('.day-comments-body');
+    var len = days.length;
+    for (var i = 0; i < len; i++) {
+      var day = $(days[i]);
+      var comments = day.find('.message');
+      var cLen = comments.length;
+      var newC = 0;
+
+      for (var c = 0; c < cLen; c++) {
+        var status = $(comments[c]).attr('data-status');
+        if (status == 'false') newC++;
+      }
+
+      if (newC > 0) {
+        var dayHeader = day.prev('.day-comments');
+        dayHeader.find('.status').html('<i class="fa fa-exclamation clr-red fs-16"></i>');
+        dayHeader.find('.new-comment').text('| new: ' + newC);
+      }
+    }
+  }
+
+  function clearFormErrors(form) {
+    form.find('.has-error').removeClass('has-error');
+  }
+
+  function checkForEmptyField(input) {
+    var len = input.val().length;
+    if (len <= 0) {
+      input.addClass('has-error');
+      return false;
+    }
+    return true;
+  }
+
+  body.on('hidden.bs.modal', '.modal', function () {
+    $('.modal').remove();
+  });
+});
+</script>

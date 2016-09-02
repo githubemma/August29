@@ -1,0 +1,67 @@
+<table style="width:750px; background-color: #ffffff;" align="center" cellspacing="0" cellpadding="0">
+  <tbody>
+  <tr>
+    <td style="height: 20px; width: 750px; background-color: #ffffff">
+    </td>
+  </tr>
+
+  <tr align="center">
+    <td style="border-top: 2px solid #000000; border-bottom: 2px solid #000000; font-size: 28px; font-weight: bold; height: 70px; width: 750px;">
+      <%= page_title %>
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      <table border="0" align="center" cellpadding="0" cellspacing="0" style="background: #ffffff;">
+        <tbody>
+        <tr>
+          <td align="center" style="padding-left: 40px; padding-right: 40px;">
+            <h3 style="font-size: 17px;"><%= page_sub_title %></h3>
+
+            <a href="<%= page_link %>" target="_blank">
+              <img src="<%= page_image %>" width="450" alt="Bela Info">
+            </a>
+
+            <p style="font-size: 16px;"><%= page_description %></p>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="font-size: 12px; padding-left: 40px; padding-right: 40px; text-align: center;">
+            <% page_columns.take(1).each do |c| %>
+                <%= c.name.titleize %>
+            <% end %>
+            <% page_columns.drop(1).each do |c| %>
+                &#9679; <%= c.name.titleize %>
+            <% end %>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="height: 20px;"></td>
+        </tr>
+
+        <tr>
+          <td align="center" >
+            <a style="background: #4b78b1;
+                padding: 8px 17px;
+                font-size: 14px;
+                border-radius: 4px;
+                outline: 0;
+                border: 0;
+                color: #ffffff;
+                text-decoration: none;" href="<%= page_link %>" target="_blank">See page >></a>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="height: 40px;"></td>
+        </tr>
+
+        </tbody>
+      </table>
+    </td>
+  </tr>
+  </tbody>
+</table>

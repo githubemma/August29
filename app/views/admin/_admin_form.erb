@@ -1,0 +1,43 @@
+<div id="add-admin-form" class="modal" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <b>${formTitle}</b>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="admin-form" class="mb-20">
+
+          <input type="hidden" name="admin_id" value="${admin_id}">
+
+          <div class="form-group">
+            <label for="email">Admin Email</label>
+            <input type="text" name="email" class="form-control" id="email" value="${email}">
+          </div>
+
+          <div class="form-group">
+            <label for="password">Admin Password</label>
+            <input type="text" name="password" class="form-control" id="password">
+          </div>
+
+        </form>
+
+        <div class="row">
+          <div class="modal-footer">
+            <div class="pull-left">
+              <button class="secondary-button" data-dismiss="modal">Cancel</button>
+            </div>
+
+            <div class="pull-right">
+              {{if admin_id}}
+              <button class="btn btn-sm btn-danger" id="delete-admin">Delete Admin</button>
+              {{/if}}
+              <button class="primary-button" id="save-admin">Save</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
